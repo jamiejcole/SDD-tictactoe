@@ -35,6 +35,7 @@ tiles = {
 	"t9": ((410, 410), (600, 600)),
 }
 
+
 while True:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
@@ -43,6 +44,7 @@ while True:
 		elif event.type == pygame.MOUSEBUTTONUP:
 			pos = pygame.mouse.get_pos()
 			print(pos)
+			mouseClick(pos)
 
 	# drawing the board
 	screen.fill(ORANGE)
@@ -57,3 +59,23 @@ while True:
 		pygame.draw.circle(screen, BLUE, tiles[i][1], 5)
 
 	pygame.display.update()
+
+	def mouseClick(pos):
+		x, y = pos[0], pos[1]
+		for i in tiles:
+			if x >= tiles[i][0][0] and x < tiles[i][1][0]:
+				if y >= tiles[i][0][1] and y < tiles[i][1][1]:
+					print("you are in tile ", i)
+					drawTile(i)
+					return
+
+	def drawTile(tile):
+		x1 = tiles[tile][0][0]
+		y1 = tiles[tile][0][1]
+		x2 = tiles[tile][1][0]
+		y2 = tiles[tile][1][1]
+		pygame.draw.line(screen, PLAYER1_COL, (x1, y1), (x2, y2), 5)
+		pygame.display.flip()
+		print('drew line in tile', tile, 'at coords:', (x1, y1), (x2, y2))
+
+
