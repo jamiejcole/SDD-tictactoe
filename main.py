@@ -57,9 +57,9 @@ def setupBoard():
 	pygame.draw.rect(screen, DARK_ORANGE, (400, 0, 10, 600))
 
 	# drawing each point on each tile to verify coords
-	for i in tiles:
-		pygame.draw.circle(screen, BLUE, tiles[i][0], 5)
-		pygame.draw.circle(screen, BLUE, tiles[i][1], 5)
+	#for i in tiles:
+	#	pygame.draw.circle(screen, BLUE, tiles[i][0], 5)
+	#	pygame.draw.circle(screen, BLUE, tiles[i][1], 5)
 
 
 setupBoard()
