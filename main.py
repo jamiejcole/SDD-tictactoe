@@ -86,34 +86,35 @@ while True:
 					return
 
 	def drawTile(tile):
-		#if checkTile(tile, currentPlayer)
 		global currentPlayer
-		x1 = tiles[tile][0][0]
-		y1 = tiles[tile][0][1]
-		x2 = tiles[tile][1][0]
-		y2 = tiles[tile][1][1]
+		if checkTile(tile, currentPlayer):
+			x1 = tiles[tile][0][0]
+			y1 = tiles[tile][0][1]
+			x2 = tiles[tile][1][0]
+			y2 = tiles[tile][1][1]
 
-		if currentPlayer == 1:
-			pygame.draw.line(screen, PLAYER2_COL, (x1+20, y1+20), (x2-20, y2-20), 7)
-			pygame.draw.line(screen, PLAYER2_COL, (x1+20, y2-20), (x2-20, y1+20), 7)
-		else:
-			xx = x2 - x1
-			yy = y2 - y1
-			mid = (xx, yy)
-			pygame.draw.circle(screen, PLAYER2_COL, (x1+(x2-x1)/2, y1+(y2-y1)/2), 70, 7)
+			if currentPlayer == 1:
+				pygame.draw.line(screen, PLAYER2_COL, (x1+20, y1+20), (x2-20, y2-20), 7)
+				pygame.draw.line(screen, PLAYER2_COL, (x1+20, y2-20), (x2-20, y1+20), 7)
+			else:
+				xx = x2 - x1
+				yy = y2 - y1
+				mid = (xx, yy)
+				pygame.draw.circle(screen, PLAYER2_COL, (x1+(x2-x1)/2, y1+(y2-y1)/2), 70, 7)
 
-		pygame.display.flip()
-		# print('drew line in tile', tile, 'at coords:', (x1, y1), (x2, y2))
+			pygame.display.flip()
+			# print('drew line in tile', tile, 'at coords:', (x1, y1), (x2, y2))
 
-		storeMove(tile, currentPlayer)
+			storeMove(tile, currentPlayer)
 
-		if currentPlayer == 1:
-			currentPlayer = 2
-		else:
-			currentPlayer = 1
+			if currentPlayer == 1:
+				currentPlayer = 2
+			else:
+				currentPlayer = 1
 
-	# def checkTile(tile, player):
-		# if player = 
+	def checkTile(tile, player):
+		x = tile[1]
+		return True if moves[int(x) - 1] == '/' else False
 
 	def storeMove(tile, currentPlayer):
 		x = tile[1]
