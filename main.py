@@ -71,8 +71,9 @@ while True:
 			pos = pygame.mouse.get_pos()
 			mouseClick(pos)
 			x = detectWin()
-			if x != False:
-				drawWin(x[0], x[1])
+			print(x)
+			#if x != False:
+			#	drawWin(x[0], x[1])
 
 
 	pygame.display.update()
@@ -127,37 +128,41 @@ while True:
 		print('\n\n')
 
 	def detectWin(): # not working, need to rework massively
+		currentIndex = 0
 		for i in moves:
 			print(i)
-			if moves[i] == i:#?
-				print('in 2nd tile')
-				if moves[i - 1] == moves[i] and moves[i + 1] == moves[i]:
-					return tiles[i - 1], tiles[i + 1]
-			elif i == 3:
-				print('in 4rd tile')
-				if moves[0] == moves[i] and moves[6] == moves[i]:
-					return tiles[0], tiles[6]
-			elif i == 4:
-				print('in 5nd tile')
-				if moves[0] == moves[i] and moves[8] == moves[i]:
-					return tiles[0], tiles[8]
-				elif moves[1] == moves[i] and moves[7] == moves[i]:
-					return tiles[1], tiles[7]
-				elif moves[2] == moves[i] and moves[6] == moves[i]:
-					return tiles[2], tiles[6]
-				elif moves[3] == moves[i] and moves[5] == moves[i]:
-					return tiles[3], tiles[5]
-			elif i == 5:
-				print('in 6nd tile')
-				if moves[2] == moves[i] and moves[8] == moves[i]:
-					return moves[2], moves[8]
-			elif i == 7:
-				print('in 8nd tile')
-				if moves[6] == moves[i] and moves[8] == moves[i]:
-					return moves[6], moves[8]
-			else:
-				print('hasnt won yet')
-				return False
+			player = i
+			if i != '/':
+				if currentIndex == 1: #?
+					print('in 2nd tile')
+					if moves[0] == player and moves[2] == player:
+						return tiles[0], tiles[2]
+				elif currentIndex == 3:
+					print('in 4rd tile')
+					if moves[0] == player and moves[6] == player:
+						return tiles[0], tiles[6]
+				elif currentIndex == 4:
+					print('in 5nd tile')
+					if moves[0] == player and moves[8] == player:
+						return tiles[0], tiles[8]
+					elif moves[1] == player and moves[7] == player:
+						return tiles[1], tiles[7]
+					elif moves[2] == player and moves[6] == player:
+						return tiles[2], tiles[6]
+					elif moves[3] == player and moves[5] == player:
+						return tiles[3], tiles[5]
+				elif currentIndex == 5:
+					print('in 6nd tile')
+					if moves[2] == player and moves[8] == player:
+						return moves[2], moves[8]
+				elif currentIndex == 7:
+					print('in 8nd tile')
+					if moves[6] == player and moves[8] == player:
+						return moves[6], moves[8]
+				else:
+					print('hasnt won yet')
+					return False
+			currentIndex += 1
 
 
 	def drawWin(pos1, pos2):
