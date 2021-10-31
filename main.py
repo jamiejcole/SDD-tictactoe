@@ -71,7 +71,7 @@ while True:
 			pos = pygame.mouse.get_pos()
 			mouseClick(pos)
 			x = detectWin()
-			print(x)
+			#print(x)
 			#if x != False:
 			#	drawWin(x[0], x[1])
 
@@ -127,7 +127,7 @@ while True:
 				print('\n')
 		print('\n\n')
 
-	def detectWin(): # not working, need to rework massively
+	def detectWin(): # not working, need to rework massively ;-;
 		currentIndex = 0
 		for i in moves:
 			print(i)
@@ -135,10 +135,14 @@ while True:
 			if i != '/':
 				if currentIndex == 1: #?
 					print('in 2nd tile')
+					print(f'moves[0]: {moves[0]}, player: {player}')
+					printBoard()
 					if moves[0] == player and moves[2] == player:
 						return tiles[0], tiles[2]
 				elif currentIndex == 3:
 					print('in 4rd tile')
+					print(f'moves[0]: {moves[0]}, player: {player}')
+					printBoard()
 					if moves[0] == player and moves[6] == player:
 						return tiles[0], tiles[6]
 				elif currentIndex == 4:
@@ -160,9 +164,11 @@ while True:
 					if moves[6] == player and moves[8] == player:
 						return moves[6], moves[8]
 				else:
-					print('hasnt won yet')
+					#print('hasnt won yet')
 					return False
+					print('\n\n')
 			currentIndex += 1
+
 
 
 	def drawWin(pos1, pos2):
