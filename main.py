@@ -23,7 +23,6 @@ PLAYER2_COL = (104, 109, 224)
 size = (600, 600)
 screen = pygame.display.set_mode(size)
 currentPlayer = 1
-hasWone = False
 
 # setting the min and max positions for each tile
 tiles = {
@@ -62,6 +61,8 @@ def setupBoard():
 
 setupBoard()
 
+
+hasWon = False
 
 while True:
 	for event in pygame.event.get():
@@ -113,8 +114,10 @@ while True:
 				currentPlayer = 1
 
 	def checkTile(tile, player):
+		global hasWon
+		print('has won:', hasWon)
 		x = tile[1]
-		return True if (moves[int(x) - 1] == '/') else False
+		return True if (moves[int(x) - 1] == '/' and hasWon == False) else False
 
 	def storeMove(tile, currentPlayer):
 		x = tile[1]
@@ -129,6 +132,7 @@ while True:
 		print('\n\n')
 
 	def detectWin():
+		global hasWon
 		for i in range(0, 8, 3):
 			if moves[i] == moves[i + 1] and moves[i] == moves[i + 2] and moves[i] != '/':
 				#print(i, "horizon")
