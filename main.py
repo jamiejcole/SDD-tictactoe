@@ -23,6 +23,7 @@ PLAYER2_COL = (104, 109, 224)
 size = (600, 600)
 screen = pygame.display.set_mode(size)
 currentPlayer = 1
+hasWone = None
 
 # setting the min and max positions for each tile
 tiles = {
@@ -73,7 +74,7 @@ while True:
 			x = detectWin()
 			if x != None:
 				print(x)
-				drawWin(x[0], x[1])
+				drawWin(x[1], x[2])
 
 
 	pygame.display.update()
@@ -128,28 +129,51 @@ while True:
 		print('\n\n')
 
 	def detectWin():
+		global hasWon
 		for i in range(0, 8, 3):
 			if moves[i] == moves[i + 1] and moves[i] == moves[i + 2] and moves[i] != '/':
 				#print(i, "horizon")
+				hasWon = True, moves[i]
 				return moves[i], i, i + 2
 
-		for i in range(0, 2):
+		for i in range(0, 3):
 			if moves[i] == moves[i + 3] and moves[i] == moves[i + 6] and moves[i] != '/':
 				#print(i, "colm")
 				return moves[i], i, i + 6
+				hasWon = True, moves[i]
 
 		if moves[4] == moves[0] and moves[4] == moves[8] and moves[4] != '/':
 			#print(i, "diag top-left bottom-right")
 			return moves[4], 0, 8
+			hasWon = True, moves[i]
 		if moves[4] == moves[2] and moves[4] == moves[6] and moves[4] != '/':
 			#print(i, "diag top-right bottom-left")
 			return moves[4], 2, 6
+			hasWon = True, moves[i]
 
 
 
 	def drawWin(pos1, pos2):
 		print(pos1, pos2)
-		
+		tileStart = tiles['t' + str(pos1 + 1)]  # ((0, 210), (200, 400))
+		tileEnd = tiles['t' + str(pos2 + 1)]   # ((0, 210), (200, 400))
+
+		# grabbing the centre of each tile
+		sx1 = tileStart[0][0]
+		sy1 = tileStart[0][1]
+		sx2 = tileStart[1][0]
+		sy2 = tileStart[1][1]
+
+		ex1 = tileEnd[0][0]
+		ey1 = tileEnd[0][1]
+		ex2 = tileEnd[1][0]
+		ey2 = tileEnd[1][1]
+
+		startCentre = (sx1+(sx2-sx1)/2, sy1+(sy2-sy1)/2)
+		endCentre = (ex1+(ex2-ex1)/2, ey1+(ey2-ey1)/2)
+		pygame.draw.line(screen, BLUE, startCentre, endCentre, 14)
+
+
 
 
 
