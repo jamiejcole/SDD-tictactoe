@@ -23,7 +23,7 @@ PLAYER2_COL = (104, 109, 224)
 size = (600, 600)
 screen = pygame.display.set_mode(size)
 currentPlayer = 1
-hasWone = None
+hasWone = False
 
 # setting the min and max positions for each tile
 tiles = {
@@ -104,7 +104,7 @@ while True:
 				mid = (xx, yy)
 				pygame.draw.circle(screen, PLAYER2_COL, (x1+(x2-x1)/2, y1+(y2-y1)/2), 70, 7)
 
-			pygame.display.flip()
+			#pygame.display.flip()
 			storeMove(tile, currentPlayer)
 
 			if currentPlayer == 1:
@@ -114,7 +114,7 @@ while True:
 
 	def checkTile(tile, player):
 		x = tile[1]
-		return True if moves[int(x) - 1] == '/' else False
+		return True if (moves[int(x) - 1] == '/') else False
 
 	def storeMove(tile, currentPlayer):
 		x = tile[1]
@@ -129,7 +129,6 @@ while True:
 		print('\n\n')
 
 	def detectWin():
-		global hasWon
 		for i in range(0, 8, 3):
 			if moves[i] == moves[i + 1] and moves[i] == moves[i + 2] and moves[i] != '/':
 				#print(i, "horizon")
@@ -139,17 +138,17 @@ while True:
 		for i in range(0, 3):
 			if moves[i] == moves[i + 3] and moves[i] == moves[i + 6] and moves[i] != '/':
 				#print(i, "colm")
-				return moves[i], i, i + 6
 				hasWon = True, moves[i]
+				return moves[i], i, i + 6
 
 		if moves[4] == moves[0] and moves[4] == moves[8] and moves[4] != '/':
 			#print(i, "diag top-left bottom-right")
-			return moves[4], 0, 8
 			hasWon = True, moves[i]
+			return moves[4], 0, 8
 		if moves[4] == moves[2] and moves[4] == moves[6] and moves[4] != '/':
 			#print(i, "diag top-right bottom-left")
-			return moves[4], 2, 6
 			hasWon = True, moves[i]
+			return moves[4], 2, 6
 
 
 
