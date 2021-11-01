@@ -71,9 +71,9 @@ while True:
 			pos = pygame.mouse.get_pos()
 			mouseClick(pos)
 			x = detectWin()
-			#print(x)
-			#if x != False:
-			#	drawWin(x[0], x[1])
+			if x != None:
+				print(x)
+				drawWin(x[0], x[1])
 
 
 	pygame.display.update()
@@ -127,52 +127,29 @@ while True:
 				print('\n')
 		print('\n\n')
 
-	def detectWin(): # not working, need to rework massively ;-;
-		currentIndex = 0
-		for i in moves:
-			print(i)
-			player = i
-			if i != '/':
-				if currentIndex == 1: #?
-					print('in 2nd tile')
-					print(f'moves[0]: {moves[0]}, player: {player}')
-					printBoard()
-					if moves[0] == player and moves[2] == player:
-						return tiles[0], tiles[2]
-				elif currentIndex == 3:
-					print('in 4rd tile')
-					print(f'moves[0]: {moves[0]}, player: {player}')
-					printBoard()
-					if moves[0] == player and moves[6] == player:
-						return tiles[0], tiles[6]
-				elif currentIndex == 4:
-					print('in 5nd tile')
-					if moves[0] == player and moves[8] == player:
-						return tiles[0], tiles[8]
-					elif moves[1] == player and moves[7] == player:
-						return tiles[1], tiles[7]
-					elif moves[2] == player and moves[6] == player:
-						return tiles[2], tiles[6]
-					elif moves[3] == player and moves[5] == player:
-						return tiles[3], tiles[5]
-				elif currentIndex == 5:
-					print('in 6nd tile')
-					if moves[2] == player and moves[8] == player:
-						return moves[2], moves[8]
-				elif currentIndex == 7:
-					print('in 8nd tile')
-					if moves[6] == player and moves[8] == player:
-						return moves[6], moves[8]
-				else:
-					#print('hasnt won yet')
-					return False
-					print('\n\n')
-			currentIndex += 1
+	def detectWin():
+		for i in range(0, 8, 3):
+			if moves[i] == moves[i + 1] and moves[i] == moves[i + 2] and moves[i] != '/':
+				#print(i, "horizon")
+				return moves[i], i, i + 2
+
+		for i in range(0, 2):
+			if moves[i] == moves[i + 3] and moves[i] == moves[i + 6] and moves[i] != '/':
+				#print(i, "colm")
+				return moves[i], i, i + 6
+
+		if moves[4] == moves[0] and moves[4] == moves[8] and moves[4] != '/':
+			#print(i, "diag top-left bottom-right")
+			return moves[4], 0, 8
+		if moves[4] == moves[2] and moves[4] == moves[6] and moves[4] != '/':
+			#print(i, "diag top-right bottom-left")
+			return moves[4], 2, 6
 
 
 
 	def drawWin(pos1, pos2):
 		print(pos1, pos2)
+		
 
 
 
