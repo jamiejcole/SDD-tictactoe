@@ -16,15 +16,22 @@ BLUE = (0, 0, 255)
 
 # customs
 ORANGE = (255, 190, 118)
+LIGHTBLUE = (75, 123, 236)
 DARK_ORANGE = (240, 147, 43)
 PLAYER1_COL = (34, 166, 179)
 PLAYER2_COL = (104, 109, 224)
 
 size = (600, 600)
 screen = pygame.display.set_mode(size)
+GAME_FONT = pygame.freetype.Font("OpenSans-Regular.ttf", 24)
+TITLE_FONT = pygame.freetype.Font("OpenSans-Regular.ttf", 34)
 currentPlayer = 1
+
 global gameHasStarted
 gameHasStarted = False
+global mainMenuDrawn
+mainMenuDrawn = False
+
 hasWon = False
 
 # setting the min and max positions for each tile
@@ -49,8 +56,46 @@ moves = [
 
 
 def doMainMenu():
-	# do shit
+	global mainMenuDrawn
+	while True:
+		if mainMenuDrawn != True:
+			def setupMenu():
+				screen.fill(LIGHTBLUE)
+				text_surface, rect = TITLE_FONT.render("Welcome to Tic Tac Toe!", (0, 0, 0))
+				screen.blit(text_surface, (100, 40))
 
+				# Multiplayer rect/text
+				pygame.draw.rect(screen, ORANGE, pygame.Rect(200, 200, 200, 50),  2, 14)
+				GAME_FONT.render_to(screen, (236, 215), "Multiplayer", (0, 0, 0))
+
+				# Computer easy
+				pygame.draw.rect(screen, ORANGE, pygame.Rect(200, 300, 200, 50),  2, 14)
+				GAME_FONT.render_to(screen, (256, 315), "AI Easy", (0, 0, 0))
+
+				# Computer hard
+				pygame.draw.rect(screen, ORANGE, pygame.Rect(200, 400, 200, 50),  2, 14)
+				GAME_FONT.render_to(screen, (256, 415), "AI Hard", (0, 0, 0))
+
+
+
+				pygame.display.update()
+			setupMenu()
+			mainMenuDrawn = True
+
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+			elif event.type == pygame.MOUSEBUTTONUP:
+				#pos = pygame.mouse.get_pos()
+				print('hi')
+
+
+		#pygame.display.update()
+
+
+
+doMainMenu()
 
 def doGame():
 	global gameHasStarted
@@ -185,4 +230,6 @@ def doGame():
 			pygame.draw.line(screen, BLACK, startCentre, endCentre, 14)
 
 
-doGame()
+#doGame()
+
+
