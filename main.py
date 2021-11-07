@@ -34,6 +34,12 @@ mainMenuDrawn = False
 
 hasWon = False
 
+global mainMenuClick
+mainMenuClick = ''
+
+global quitGame
+quitGame = False
+
 # setting the min and max positions for each tile
 tiles = {
 	"t1": ((0, 0), (200, 200)),
@@ -53,10 +59,26 @@ moves = [
 	'/', '/', '/'
 ]
 
+class menuManager (threading.Thread):
+	def run(self):
+		global mainMenuClick
+		while True:
+			if mainMenuClick == 'multiplayer':
+				doGame()
+				print('did multiplarey')
+			else:
+				print('e')
+				sleep(0.5)
+		#print('hello')
+
+
+#menuManager = menuManager()
+#menuManager.start()
 
 
 def doMainMenu():
 	global mainMenuDrawn
+	global mainMenuClick
 	while True:
 		if mainMenuDrawn != True:
 			def setupMenu():
@@ -82,20 +104,29 @@ def doMainMenu():
 			setupMenu()
 			mainMenuDrawn = True
 
+
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
 				sys.exit()
 			elif event.type == pygame.MOUSEBUTTONUP:
-				#pos = pygame.mouse.get_pos()
-				print('hi')
+				pos = pygame.mouse.get_pos()
+				mouseClick(pos)
+				return
 
+		def mouseClick(pos):
+			global mainMenuClick
+			x, y = pos[0], pos[1]
+			if x >= 200 and x <= 400 and y >= 200 and y <= 250:
+				print('clicked Multiplayer')
+				mainMenuClick = 'multiplayer'
 
 		#pygame.display.update()
 
 
-
 doMainMenu()
+
+
 
 def doGame():
 	global gameHasStarted
@@ -230,6 +261,7 @@ def doGame():
 			pygame.draw.line(screen, BLACK, startCentre, endCentre, 14)
 
 
-#doGame()
 
-
+if mainMenuClick == 'multiplayer':
+	doGame()
+	
