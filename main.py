@@ -41,6 +41,9 @@ mainMenuClick = ''
 global quitGame
 quitGame = False
 
+global aiMoveNo
+aiMoveNo = 1
+
 # setting the min and max positions for each tile
 tiles = {
 	"t1": ((0, 0), (200, 200)),
@@ -422,7 +425,168 @@ def doRandom():
 			endCentre = (ex1+(ex2-ex1)/2, ey1+(ey2-ey1)/2)
 			pygame.draw.line(screen, BLACK, startCentre, endCentre, 14)
 
+
+##### MINIMAX COMPUTER MOVES #####
+def doHard():
+	global gameHasStarted
+	while True:
+		if gameHasStarted != True:
+			def setupBoard():
+				# drawing the board
+				screen.fill(ORANGE)
+				pygame.draw.rect(screen, DARK_ORANGE, (0, 200, 600, 10))
+				pygame.draw.rect(screen, DARK_ORANGE, (0, 400, 600, 10))
+				pygame.draw.rect(screen, DARK_ORANGE, (200, 0, 10, 600))
+				pygame.draw.rect(screen, DARK_ORANGE, (400, 0, 10, 600))
+
+				# drawing each point on each tile to verify coords
+				#for i in tiles:
+				#	pygame.draw.circle(screen, BLUE, tiles[i][0], 5)
+				#	pygame.draw.circle(screen, BLUE, tiles[i][1], 5)
+
+			setupBoard()
+			gameHasStarted = True
+
+
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				sys.exit()
+			elif event.type == pygame.MOUSEBUTTONUP:
+				pos = pygame.mouse.get_pos()
+				mouseClick(pos)
+				x = detectWin()
+				if x != None:
+					print(x)
+					drawWin(x[1], x[2])
+
+
+		pygame.display.update()
+
+		def mouseClick(pos):
+			x, y = pos[0], pos[1]
+			for i in tiles:
+				if x >= tiles[i][0][0] and x < tiles[i][1][0]:
+					if y >= tiles[i][0][1] and y < tiles[i][1][1]:
+						drawTile(i)
+						return
+
+		def drawTile(tile):
+			global currentPlayer
+			global aiMoveNo
+			if checkTile(tile, currentPlayer):
+				x1 = tiles[tile][0][0]
+				y1 = tiles[tile][0][1]
+				x2 = tiles[tile][1][0]
+				y2 = tiles[tile][1][1]
+
+
+				pygame.draw.line(screen, PLAYER2_COL, (x1+20, y1+20), (x2-20, y2-20), 7)
+				pygame.draw.line(screen, PLAYER2_COL, (x1+20, y2-20), (x2-20, y1+20), 7)
+				#else:
+				#	xx = x2 - x1
+				#	yy = y2 - y1
+				#	mid = (xx, yy)
+					
+
+				#pygame.display.flip()
+				storeMove(tile, currentPlayer)
+
+				
+				x = detectWin()
+				if x != None:
+					print(x)
+					drawWin(x[1], x[2])
+					
+				satisfied = False
+				attemptNo = 0
+				while satisfied != True:
+					if aiMoveNo == 1:
+						if moves[4] == '1':
+							print('e')
+
+					# randNum = random.randint(0, 8)
+					# print('rand num: ', randNum)
+					# if moves[randNum] == '/':
+					# 	satisfied = True
+					# 	x1 = tiles['t' + str(randNum + 1)][0][0]
+					# 	y1 = tiles['t' + str(randNum + 1)][0][1]
+					# 	x2 = tiles['t' + str(randNum + 1)][1][0]
+					# 	y2 = tiles['t' + str(randNum + 1)][1][1]
+					# 	pygame.draw.circle(screen, PLAYER2_COL, (x1+(x2-x1)/2, y1+(y2-y1)/2), 70, 7)
+					# 	storeMove('t' + str(randNum + 1), 2)
+					# else:
+					# 	attemptNo += 1
+					# 	if attemptNo >= 10:
+					# 		return
+
+
+		def checkTile(tile, player):
+			global hasWon
+			print('has won:', hasWon)
+			x = tile[1]
+			return True if (moves[int(x) - 1] == '/' and hasWon == False) else False
+
+		def storeMove(tile, currentPlayer):
+			x = tile[1]
+			moves[int(x) - 1] = str(currentPlayer)
+			#printBoard()
+
+		def printBoard():
+			for i, j in enumerate(moves):
+				print(moves[i], end='')
+				if i % 3 == 2:
+					print('\n')
+			print('\n\n')
+
+		def detectWin():
+			global hasWon
+			for i in range(0, 8, 3):
+				if moves[i] == moves[i + 1] and moves[i] == moves[i + 2] and moves[i] != '/':
+					#print(i, "horizon")
+					hasWon = True, moves[i]
+					return moves[i], i, i + 2
+
+			for i in range(0, 3):
+				if moves[i] == moves[i + 3] and moves[i] == moves[i + 6] and moves[i] != '/':
+					#print(i, "colm")
+					hasWon = True, moves[i]
+					return moves[i], i, i + 6
+
+			if moves[4] == moves[0] and moves[4] == moves[8] and moves[4] != '/':
+				#print(i, "diag top-left bottom-right")
+				hasWon = True, moves[i]
+				return moves[4], 0, 8
+			if moves[4] == moves[2] and moves[4] == moves[6] and moves[4] != '/':
+				#print(i, "diag top-right bottom-left")
+				hasWon = True, moves[i]
+				return moves[4], 2, 6
+
+
+
+		def drawWin(pos1, pos2):
+			print(pos1, pos2)
+			tileStart = tiles['t' + str(pos1 + 1)]  # ((0, 210), (200, 400))
+			tileEnd = tiles['t' + str(pos2 + 1)]   # ((0, 210), (200, 400))
+
+			# grabbing the centre of each tile
+			sx1 = tileStart[0][0]
+			sy1 = tileStart[0][1]
+			sx2 = tileStart[1][0]
+			sy2 = tileStart[1][1]
+
+			ex1 = tileEnd[0][0]
+			ey1 = tileEnd[0][1]
+			ex2 = tileEnd[1][0]
+			ey2 = tileEnd[1][1]
+
+			startCentre = (sx1+(sx2-sx1)/2, sy1+(sy2-sy1)/2)
+			endCentre = (ex1+(ex2-ex1)/2, ey1+(ey2-ey1)/2)
+			pygame.draw.line(screen, BLACK, startCentre, endCentre, 14)
+
 if mainMenuClick == 'multiplayer':
 	doGame()
 elif mainMenuClick == 'random':
 	doRandom()
+elif mainMenuClick = 'hard':
+	doHard()
