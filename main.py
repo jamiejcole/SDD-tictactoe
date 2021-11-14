@@ -507,30 +507,30 @@ def doHard():
 						if moves[i] == moves[i + 1] and moves[i + 2] == '/' and moves[i] != '/' or moves[i + 1] == moves[i + 2] and moves[i] == '/' and moves[i + 1] != '/':
 							#print(i, "horizon")
 							if moves[i] == moves[i + 1] and moves[i + 2] == '/' and moves[i] != '/':
-								return i + 2
+								return i + 2, moves[i]
 							elif moves[i + 1] == moves[i + 2] and moves[i] == '/' and moves[i + 1] != '/':
-								return i
+								return i, moves[i + 1]
 
 					for i in range(0, 3):
 						if moves[i] == moves[i + 3] and moves[i + 6] == '/' and moves[i] != '/' or moves[i + 3] == moves[i + 6] and moves[i] == '/' and moves[i + 3] != '/':
 							#print(i, "colm")
 							if moves[i] == moves[i + 3] and moves[i + 6] == '/' and moves[i] != '/':
-								return i + 6
+								return i + 6, moves[i]
 							elif moves[i + 3] == moves[i + 6] and moves[i] == '/' and moves[i + 3] != '/':
-								return i
+								return i, moves[i + 3]
 
 					if moves[4] == moves[0] and moves[8] == '/' and moves[4] != '/' or moves[4] == moves[8] and moves[0] == '/' and moves[4] != '/':
 						#print(i, "diag top-left bottom-right")
 						if moves[4] == moves[0] and moves[8] == '/' and moves[4] != '/':
-							return 8
+							return 8, moves[4]
 						elif moves[4] == moves[8] and moves[0] == '/' and moves[4] != '/':
-							return 0
+							return 0, moves[4]
 					if moves[4] == moves[2] and moves[6] == '/' and moves[4] != '/'or moves[4] == moves[6] and moves[2] == '/'  and moves[4] != '/':
 						#print(i, "diag top-right bottom-left")
 						if moves[4] == moves[2] and moves[6] == '/' and moves[4] != '/':
-							return 6
+							return 6, moves[4]
 						elif moves[4] == moves[6] and moves[2] == '/'  and moves[4] != '/':
-							return 2
+							return 2, moves[4]
 					return 'no'
 
 				satisfied = False
@@ -549,7 +549,7 @@ def doHard():
 							aiMoveNo += 1
 							break
 					elif aiMoveNo == 2:
-						x = detectTwoInARow()
+						x = detectTwoInARow()[0]
 						print(x)
 						if x != 'no':
 							drawCircle(x)
@@ -564,13 +564,36 @@ def doHard():
 									drawCircle(choice)
 						aiMoveNo += 1
 						break
-					elif aiMoveNo == 3:
+					else:
 						x = detectTwoInARow()
-						print(x)
-						if x != 'no':
-							drawCircle(x)
-						elif x == 'no':
-							print('cry')
+						print('newx:', x)
+						if x != 'no' and x[1] == '1':
+							drawCircle(x[0])
+						elif x != 'no' and x[1] == '2':
+							drawCircle(x[0])
+						else:
+							checked = False
+							checkedNos = []
+							while checked != True and len(checkedNos) < 9:
+								choice = random.randint(0, 8)
+								print('tried position: ', choice)
+								if moves[choice] == '/' and choice not in checkedNos:
+									checked = True
+									drawCircle(choice)
+								else: 
+									print('position ', choice, ' contains ', moves[choice])
+									if choice not in checkedNos:
+										checkedNos.append(choice)
+							print('DRAW!')
+						aiMoveNo += 1
+						break 
+						# so, so, many bugs.
+						# 1. will randomly decide its a draw
+						# 2. when there is an obvious move for computer to make
+						#    to win, it doesn't go, a line with a gap in 
+						#    the middle.
+						# 3. program crashes when there are 2 xs in a row and 
+						#    then user goes in the 3rd spot in the row...
 
 
 
