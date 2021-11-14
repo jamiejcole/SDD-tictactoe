@@ -127,6 +127,9 @@ def doMainMenu():
 			elif x >= 200 and x <= 400 and y >= 300 and y <= 350:
 				print('clicked ai random')
 				mainMenuClick = 'random'
+			elif x >= 200 and x <= 400 and y >= 400 and y <= 450:
+				print('clicked ai hard')
+				mainMenuClick = 'hard'
 
 		#pygame.display.update()
 
@@ -483,42 +486,93 @@ def doHard():
 
 				pygame.draw.line(screen, PLAYER2_COL, (x1+20, y1+20), (x2-20, y2-20), 7)
 				pygame.draw.line(screen, PLAYER2_COL, (x1+20, y2-20), (x2-20, y1+20), 7)
-				#else:
-				#	xx = x2 - x1
-				#	yy = y2 - y1
-				#	mid = (xx, yy)
-					
-
-				#pygame.display.flip()
 				storeMove(tile, currentPlayer)
-
 				
 				x = detectWin()
 				if x != None:
 					print(x)
 					drawWin(x[1], x[2])
 					
+
+				def drawCircle(circleTile):
+					x1 = tiles['t' + str(circleTile + 1)][0][0]
+					y1 = tiles['t' + str(circleTile + 1)][0][1]
+					x2 = tiles['t' + str(circleTile + 1)][1][0]
+					y2 = tiles['t' + str(circleTile + 1)][1][1]
+					pygame.draw.circle(screen, PLAYER2_COL, (x1+(x2-x1)/2, y1+(y2-y1)/2), 70, 7)
+					storeMove('t' + str(circleTile + 1), 2)
+
+				def detectTwoInARow():
+					for i in range(0, 8, 3):
+						if moves[i] == moves[i + 1] and moves[i + 2] == '/' and moves[i] != '/' or moves[i + 1] == moves[i + 2] and moves[i] == '/' and moves[i + 1] != '/':
+							#print(i, "horizon")
+							if moves[i] == moves[i + 1] and moves[i + 2] == '/' and moves[i] != '/':
+								return i + 2
+							elif moves[i + 1] == moves[i + 2] and moves[i] == '/' and moves[i + 1] != '/':
+								return i
+
+					for i in range(0, 3):
+						if moves[i] == moves[i + 3] and moves[i + 6] == '/' and moves[i] != '/' or moves[i + 3] == moves[i + 6] and moves[i] == '/' and moves[i + 3] != '/':
+							#print(i, "colm")
+							if moves[i] == moves[i + 3] and moves[i + 6] == '/' and moves[i] != '/':
+								return i + 6
+							elif moves[i + 3] == moves[i + 6] and moves[i] == '/' and moves[i + 3] != '/':
+								return i
+
+					if moves[4] == moves[0] and moves[8] == '/' and moves[4] != '/' or moves[4] == moves[8] and moves[0] == '/' and moves[4] != '/':
+						#print(i, "diag top-left bottom-right")
+						if moves[4] == moves[0] and moves[8] == '/' and moves[4] != '/':
+							return 8
+						elif moves[4] == moves[8] and moves[0] == '/' and moves[4] != '/':
+							return 0
+					if moves[4] == moves[2] and moves[6] == '/' and moves[4] != '/'or moves[4] == moves[6] and moves[2] == '/'  and moves[4] != '/':
+						#print(i, "diag top-right bottom-left")
+						if moves[4] == moves[2] and moves[6] == '/' and moves[4] != '/':
+							return 6
+						elif moves[4] == moves[6] and moves[2] == '/'  and moves[4] != '/':
+							return 2
+					return 'no'
+
 				satisfied = False
 				attemptNo = 0
 				while satisfied != True:
 					if aiMoveNo == 1:
 						if moves[4] == '1':
-							print('e')
+							print('player 1 went in centre tile')
+							corners = [0, 2, 6, 8]
+							drawCircle(random.choice(corners))
+							aiMoveNo += 1
+							break
+						elif moves[4] == '/':
+							print('player 1 didnt go in centre tile')
+							drawCircle(4)
+							aiMoveNo += 1
+							break
+					elif aiMoveNo == 2:
+						x = detectTwoInARow()
+						print(x)
+						if x != 'no':
+							drawCircle(x)
+						elif x == 'no':
+							print('2nd move, no two xs in a line...')
+							checked = False
+							while checked != True:
+								corners = [0, 2, 6, 8]
+								choice = random.choice(corners)
+								if moves[choice] == '/':
+									checked = True
+									drawCircle(choice)
+						aiMoveNo += 1
+						break
+					elif aiMoveNo == 3:
+						x = detectTwoInARow()
+						print(x)
+						if x != 'no':
+							drawCircle(x)
+						elif x == 'no':
+							print('cry')
 
-					# randNum = random.randint(0, 8)
-					# print('rand num: ', randNum)
-					# if moves[randNum] == '/':
-					# 	satisfied = True
-					# 	x1 = tiles['t' + str(randNum + 1)][0][0]
-					# 	y1 = tiles['t' + str(randNum + 1)][0][1]
-					# 	x2 = tiles['t' + str(randNum + 1)][1][0]
-					# 	y2 = tiles['t' + str(randNum + 1)][1][1]
-					# 	pygame.draw.circle(screen, PLAYER2_COL, (x1+(x2-x1)/2, y1+(y2-y1)/2), 70, 7)
-					# 	storeMove('t' + str(randNum + 1), 2)
-					# else:
-					# 	attemptNo += 1
-					# 	if attemptNo >= 10:
-					# 		return
+
 
 
 		def checkTile(tile, player):
@@ -588,5 +642,5 @@ if mainMenuClick == 'multiplayer':
 	doGame()
 elif mainMenuClick == 'random':
 	doRandom()
-elif mainMenuClick = 'hard':
+elif mainMenuClick == 'hard':
 	doHard()
