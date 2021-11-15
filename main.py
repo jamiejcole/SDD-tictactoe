@@ -44,6 +44,9 @@ quitGame = False
 global aiMoveNo
 aiMoveNo = 1
 
+global playerMoveDict
+playerMoveDict = {}
+
 # setting the min and max positions for each tile
 tiles = {
 	"t1": ((0, 0), (200, 200)),
@@ -477,6 +480,7 @@ def doHard():
 		def drawTile(tile):
 			global currentPlayer
 			global aiMoveNo
+			global playerMoveDict
 			if checkTile(tile, currentPlayer):
 				x1 = tiles[tile][0][0]
 				y1 = tiles[tile][0][1]
@@ -487,10 +491,14 @@ def doHard():
 				pygame.draw.line(screen, PLAYER2_COL, (x1+20, y1+20), (x2-20, y2-20), 7)
 				pygame.draw.line(screen, PLAYER2_COL, (x1+20, y2-20), (x2-20, y1+20), 7)
 				storeMove(tile, currentPlayer)
+
+				#Adding the player's move to the playerMove dictionary
+				playerMoveDict[len(playerMoveDict) + 1] = int(tile[1]) - 1
+				print(playerMoveDict)
 				
 				x = detectWin()
 				if x != None:
-					print(x)
+					#print(x)
 					drawWin(x[1], x[2])
 					return
 					
@@ -503,6 +511,23 @@ def doHard():
 					y2 = tiles['t' + str(circleTile + 1)][1][1]
 					pygame.draw.circle(screen, PLAYER2_COL, (x1+(x2-x1)/2, y1+(y2-y1)/2), 70, 7)
 					storeMove('t' + str(circleTile + 1), 2)
+
+				def findAdjacent(tile):
+					print("finding adjacent tile in tile", tile)
+					adjacentTiles = {
+						0: (1, 3),
+						2: (1, 5),
+						6: (3, 7),
+						8: (7, 5)
+					}
+
+					if tile not in list(adjacentTiles.keys()):
+						return 'no'
+					else:
+						for i in adjacentTiles[tile]:
+							if moves[i] == '/':
+								return i
+						return 'no'
 
 				def detectTwoInARow():
 					for i in range(0, 8, 3):
@@ -558,10 +583,20 @@ def doHard():
 						x = detectTwoInARow()
 						print(x)
 						if x != 'no':
-							print('x=', x)
+							#print('x=', x)
 							drawCircle(x[0])
 						elif x == 'no':
 							print('2nd move, no two xs in a line...')
+							# Adjacent: means next to not in a corner
+							#choice = findAdjacent()
+							
+							#drawCircle(choice)
+							lastPlayerMove = playerMoveDict[next(reversed(playerMoveDict.keys()))]
+							print('last player move:', lastPlayerMove)
+
+							print("ADJACENT:", findAdjacent(lastPlayerMove))
+
+
 							checked = False
 							while checked != True:
 								corners = [0, 2, 6, 8] # Adjacent: means next to not in a corner
@@ -573,7 +608,7 @@ def doHard():
 						break
 					else:
 						x = detectTwoInARow()
-						print('newx:', x)
+						#print('newx:', x)
 						if x != 'no' and x[1] == '1':
 							drawCircle(x[0])
 						elif x != 'no' and x[1] == '2':
