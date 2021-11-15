@@ -492,9 +492,11 @@ def doHard():
 				if x != None:
 					print(x)
 					drawWin(x[1], x[2])
+					return
 					
 
 				def drawCircle(circleTile):
+					print('circletile: ' , circleTile)
 					x1 = tiles['t' + str(circleTile + 1)][0][0]
 					y1 = tiles['t' + str(circleTile + 1)][0][1]
 					x2 = tiles['t' + str(circleTile + 1)][1][0]
@@ -549,10 +551,11 @@ def doHard():
 							aiMoveNo += 1
 							break
 					elif aiMoveNo == 2:
-						x = detectTwoInARow()[0]
+						x = detectTwoInARow()
 						print(x)
 						if x != 'no':
-							drawCircle(x)
+							print('x=', x)
+							drawCircle(x[0])
 						elif x == 'no':
 							print('2nd move, no two xs in a line...')
 							checked = False
