@@ -506,20 +506,24 @@ def doHard():
 
 				def detectTwoInARow():
 					for i in range(0, 8, 3):
-						if moves[i] == moves[i + 1] and moves[i + 2] == '/' and moves[i] != '/' or moves[i + 1] == moves[i + 2] and moves[i] == '/' and moves[i + 1] != '/':
+						if moves[i] == moves[i + 1] and moves[i + 2] == '/' and moves[i] != '/' or moves[i] == moves[i + 2] and moves[i + 1] == '/' and moves[i] != '/' or moves[i + 1] == moves[i + 2] and moves[i] == '/' and moves[i + 1] != '/':
 							#print(i, "horizon")
 							if moves[i] == moves[i + 1] and moves[i + 2] == '/' and moves[i] != '/':
 								return i + 2, moves[i]
 							elif moves[i + 1] == moves[i + 2] and moves[i] == '/' and moves[i + 1] != '/':
 								return i, moves[i + 1]
+							elif moves[i] == moves[i + 2] and moves[i + 1] == '/' and moves[i] != '/':
+								return i + 1, moves[i]
 
 					for i in range(0, 3):
-						if moves[i] == moves[i + 3] and moves[i + 6] == '/' and moves[i] != '/' or moves[i + 3] == moves[i + 6] and moves[i] == '/' and moves[i + 3] != '/':
+						if moves[i] == moves[i + 3] and moves[i + 6] == '/' and moves[i] != '/' or moves[i] == moves[i + 6] and moves[i + 3] == '/' and moves[i] != '/' or moves[i + 3] == moves[i + 6] and moves[i] == '/' and moves[i + 3] != '/':
 							#print(i, "colm")
 							if moves[i] == moves[i + 3] and moves[i + 6] == '/' and moves[i] != '/':
 								return i + 6, moves[i]
 							elif moves[i + 3] == moves[i + 6] and moves[i] == '/' and moves[i + 3] != '/':
 								return i, moves[i + 3]
+							elif moves[i] == moves[i + 6] and moves[i + 3] == '/' and moves[i] != '/':
+								return i + 3, moves[i]
 
 					if moves[4] == moves[0] and moves[8] == '/' and moves[4] != '/' or moves[4] == moves[8] and moves[0] == '/' and moves[4] != '/':
 						#print(i, "diag top-left bottom-right")
@@ -560,7 +564,7 @@ def doHard():
 							print('2nd move, no two xs in a line...')
 							checked = False
 							while checked != True:
-								corners = [0, 2, 6, 8]
+								corners = [0, 2, 6, 8] # Adjacent: means next to not in a corner
 								choice = random.choice(corners)
 								if moves[choice] == '/':
 									checked = True
