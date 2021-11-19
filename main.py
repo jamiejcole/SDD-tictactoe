@@ -518,7 +518,11 @@ def doHard():
 						0: (1, 3),
 						2: (1, 5),
 						6: (3, 7),
-						8: (7, 5)
+						8: (7, 5),
+						1: (0, 2),
+						3: (0, 6),
+						5: (2, 8),
+						7: (6, 8)
 					}
 
 					if tile not in list(adjacentTiles.keys()):
@@ -534,21 +538,30 @@ def doHard():
 						if moves[i] == moves[i + 1] and moves[i + 2] == '/' and moves[i] != '/' or moves[i] == moves[i + 2] and moves[i + 1] == '/' and moves[i] != '/' or moves[i + 1] == moves[i + 2] and moves[i] == '/' and moves[i + 1] != '/':
 							#print(i, "horizon")
 							if moves[i] == moves[i + 1] and moves[i + 2] == '/' and moves[i] != '/':
+								print('yeeman 1')
 								return i + 2, moves[i]
 							elif moves[i + 1] == moves[i + 2] and moves[i] == '/' and moves[i + 1] != '/':
+								print('yeeman 2')
 								return i, moves[i + 1]
 							elif moves[i] == moves[i + 2] and moves[i + 1] == '/' and moves[i] != '/':
+								print('yeeman 3')
 								return i + 1, moves[i]
 
 					for i in range(0, 3):
+						print('MOVESI: ', moves[i], 'I:', i)
 						if moves[i] == moves[i + 3] and moves[i + 6] == '/' and moves[i] != '/' or moves[i] == moves[i + 6] and moves[i + 3] == '/' and moves[i] != '/' or moves[i + 3] == moves[i + 6] and moves[i] == '/' and moves[i + 3] != '/':
 							#print(i, "colm")
+							print('MOVESI2: ', moves[i], 'I:', i)
 							if moves[i] == moves[i + 3] and moves[i + 6] == '/' and moves[i] != '/':
 								return i + 6, moves[i]
+								print('cs1 ')
 							elif moves[i + 3] == moves[i + 6] and moves[i] == '/' and moves[i + 3] != '/':
 								return i, moves[i + 3]
+								print('cs2 ')
 							elif moves[i] == moves[i + 6] and moves[i + 3] == '/' and moves[i] != '/':
+								print('cs3 ')
 								return i + 3, moves[i]
+						
 
 					if moves[4] == moves[0] and moves[8] == '/' and moves[4] != '/' or moves[4] == moves[8] and moves[0] == '/' and moves[4] != '/':
 						#print(i, "diag top-left bottom-right")
@@ -569,13 +582,13 @@ def doHard():
 				while satisfied != True:
 					if aiMoveNo == 1:
 						if moves[4] == '1':
-							print('player 1 went in centre tile')
+							#print('player 1 went in centre tile')
 							corners = [0, 2, 6, 8]
 							drawCircle(random.choice(corners))
 							aiMoveNo += 1
 							break
 						elif moves[4] == '/':
-							print('player 1 didnt go in centre tile')
+							#print('player 1 didnt go in centre tile')
 							drawCircle(4)
 							aiMoveNo += 1
 							break
@@ -583,47 +596,56 @@ def doHard():
 						x = detectTwoInARow()
 						print(x)
 						if x != 'no':
+							#print('FOUND RTHE TWO IN A ROW: ', x)
 							#print('x=', x)
 							drawCircle(x[0])
 						elif x == 'no':
-							print('2nd move, no two xs in a line...')
+							#print('DID NOT FOUND RTHE TWO IN A ROW: ', x)
+							#print('2nd move, no two xs in a line...')
 							# Adjacent: means next to not in a corner
 							#choice = findAdjacent()
 							
 							#drawCircle(choice)
 							lastPlayerMove = playerMoveDict[next(reversed(playerMoveDict.keys()))]
-							print('last player move:', lastPlayerMove)
+							#print('last player move:', lastPlayerMove)
 
-							print("ADJACENT:", findAdjacent(lastPlayerMove))
+							adjacentPos = findAdjacent(lastPlayerMove)
+							#print("ADJACENT:", adjacentPos)
 
+							drawCircle(adjacentPos)
 
-							checked = False
-							while checked != True:
-								corners = [0, 2, 6, 8] # Adjacent: means next to not in a corner
-								choice = random.choice(corners)
-								if moves[choice] == '/':
-									checked = True
-									drawCircle(choice)
+							# checked = False
+							# while checked != True:
+							# 	corners = [0, 2, 6, 8] # Adjacent: means next to not in a corner
+							# 	choice = random.choice(corners)
+							# 	if moves[choice] == '/':
+							# 		checked = True
+							# 		drawCircle(choice)
 						aiMoveNo += 1
+						print('got here')
 						break
-					else:
+					elif aiMoveNo > 2:
+						print('got here 2')
 						x = detectTwoInARow()
-						#print('newx:', x)
+						print('newx6969:', x)
 						if x != 'no' and x[1] == '1':
+							print('IFSTATEMENT 1')
 							drawCircle(x[0])
 						elif x != 'no' and x[1] == '2':
+							print('IFSTATEMENT 2')
 							drawCircle(x[0])
 						else:
+							print('IFSTATEMENT 3')
 							checked = False
 							checkedNos = []
 							while checked != True and len(checkedNos) < 9:
 								choice = random.randint(0, 8)
-								print('tried position: ', choice)
+								#print('tried position: ', choice)
 								if moves[choice] == '/' and choice not in checkedNos:
 									checked = True
 									drawCircle(choice)
 								else: 
-									print('position ', choice, ' contains ', moves[choice])
+									#print('position ', choice, ' contains ', moves[choice])
 									if choice not in checkedNos:
 										checkedNos.append(choice)
 							print('DRAW!')
