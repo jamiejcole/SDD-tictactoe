@@ -6,8 +6,14 @@ import pygame, pygame.freetype
 import threading
 import random
 from time import sleep
+import pygame_textinput
+import tkinter
+from tkinter import simpledialog
+#from tkinter import messagebox
+from tkinter import *
 
 pygame.init()
+clock = pygame.time.Clock()
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -47,6 +53,11 @@ aiMoveNo = 1
 global playerMoveDict
 playerMoveDict = {}
 
+global textInput
+textInput = ''
+
+
+
 # setting the min and max positions for each tile
 tiles = {
 	"t1": ((0, 0), (200, 200)),
@@ -83,9 +94,21 @@ class menuManager (threading.Thread):
 #menuManager.start()
 
 
+class textManager (threading.Thread):
+	def run(self):
+		#import tkinter
+		#from tkinter import simpledialog
+		root = tkinter.Tk()
+		print('e')
+
+textManager = textManager()
+textManager.start()
+
 def doMainMenu():
 	global mainMenuDrawn
 	global mainMenuClick
+	#global textInput
+	# nameTextInput = pygame_textinput.TextInputVisualizer()
 	while True:
 		if mainMenuDrawn != True:
 			def setupMenu():
@@ -105,21 +128,41 @@ def doMainMenu():
 				pygame.draw.rect(screen, ORANGE, pygame.Rect(200, 400, 200, 50),  2, 14)
 				GAME_FONT.render_to(screen, (256, 415), "AI Hard", (0, 0, 0))
 
-
+				#root = tkinter.Tk()
+				#sleep(0.5)
+				# withdraw() will make the parent window disappear.
+				#root.withdraw()
+				
 
 				pygame.display.update()
 			setupMenu()
 			mainMenuDrawn = True
 
+		events = pygame.event.get()
+		
+		#nameTextInput.update(events)
+		#screen.blit(nameTextInput.surface, (10, 10))
 
-		for event in pygame.event.get():
+
+		for event in events:
 			if event.type == pygame.QUIT:
 				pygame.quit()
 				sys.exit()
 			elif event.type == pygame.MOUSEBUTTONUP:
 				pos = pygame.mouse.get_pos()
-				mouseClick(pos)
-				return
+				x = mouseClick(pos)
+				if x == 'complete':
+					return
+			elif event.type == pygame.KEYDOWN:
+				print('e')
+
+		# shows a dialogue with a string input field
+		#youtube_url = simpledialog.askstring('YouTube URL', 'Enter the youtube URL of the video', parent=root)
+		#print(youtube_url)
+
+
+		#inputTextSurface = baseFont.render(textInput, True, (255, 255, 255))
+		#screen.blit(inputTextSurface, (0, 0))
 
 		def mouseClick(pos):
 			global mainMenuClick
@@ -127,12 +170,16 @@ def doMainMenu():
 			if x >= 200 and x <= 400 and y >= 200 and y <= 250:
 				print('clicked Multiplayer')
 				mainMenuClick = 'multiplayer'
+				return 'complete'
 			elif x >= 200 and x <= 400 and y >= 300 and y <= 350:
 				print('clicked ai random')
 				mainMenuClick = 'random'
+				return 'complete'
 			elif x >= 200 and x <= 400 and y >= 400 and y <= 450:
 				print('clicked ai hard')
 				mainMenuClick = 'hard'
+				return 'complete'
+
 
 		#pygame.display.update()
 
