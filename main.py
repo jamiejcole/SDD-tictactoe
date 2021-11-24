@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.9
 import sys
 import os
 import time
@@ -85,7 +86,7 @@ class menuManager (threading.Thread):
 				doGame()
 				print('did multiplarey')
 			else:
-				print('e')
+				print('xe')
 				sleep(0.5)
 		#print('hello')
 
@@ -94,15 +95,18 @@ class menuManager (threading.Thread):
 #menuManager.start()
 
 
-class textManager (threading.Thread):
-	def run(self):
-		#import tkinter
-		#from tkinter import simpledialog
-		root = tkinter.Tk()
-		print('e')
+# class textManager (threading.Thread):
+# 	def run(self):
+# 		#import tkinter
+# 		#from tkinter import simpledialog
+# 		root = tkinter.Tk()
+# 		print('ex')
 
-textManager = textManager()
-textManager.start()
+
+#textManager = textManager()
+#textManager.start()
+
+#root = tkinter.Tk()
 
 def doMainMenu():
 	global mainMenuDrawn
@@ -185,6 +189,8 @@ def doMainMenu():
 
 
 doMainMenu()
+
+#root = tkinter.Tk()
 
 
 ##### PLAYER VS PLAYER 
