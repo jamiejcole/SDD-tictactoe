@@ -11,14 +11,14 @@ import pygame_textinput
 import tkinter
 from tkinter import simpledialog
 from tkinter import *
+from macAddress import getMacAddress
+import pyrebase
 
 root = tkinter.Tk()
 embed = tkinter.Frame(root, width=600, height=600)
 embed.grid(columnspan=(600), rowspan=(500))
 embed.pack(side=LEFT)
 os.environ["SDL_WINDOWID"] = str(embed.winfo_id())
-# check if OS is windows, if so, run:
-#os.environ["SDL_VIDEODRIVER"] = 'windib' 
 
 root.update()
 root.withdraw()
@@ -44,7 +44,10 @@ PLAYER2_COL = (104, 109, 224)
 size = (600, 600)
 screen = pygame.display.set_mode(size)
 GAME_FONT = pygame.freetype.Font("OpenSans-Regular.ttf", 24)
+GAME_FONT_SMALL = pygame.freetype.Font("OpenSans-Regular.ttf", 16)
 TITLE_FONT = pygame.freetype.Font("OpenSans-Regular.ttf", 34)
+TITLE_FONT_SMALL = pygame.freetype.Font("OpenSans-Regular.ttf", 22)
+
 currentPlayer = 1
 
 global gameHasStarted
@@ -69,6 +72,16 @@ playerMoveDict = {}
 global textInput
 textInput = ''
 
+
+config = {
+  "apiKey": "AIzaSyDTcEP5kkVDE1n7n1MjwBuceo3hO3BNV9o",
+  "authDomain": "sdd-tictactoe.firebaseapp.com",
+  "databaseURL": "https://sdd-tictactoe-default-rtdb.firebaseio.com",
+  "storageBucket": "sdd-tictactoe.appspot.com"
+}
+
+firebase = pyrebase.initialize_app(config)
+database = firebase.database()
 
 
 # setting the min and max positions for each tile
@@ -118,15 +131,59 @@ class menuManager (threading.Thread):
 #textManager.start()
 
 
+
 def doMainMenu():
 	global mainMenuDrawn
 	global mainMenuClick
 	while True:
 		if mainMenuDrawn != True:
+			def changeUsername():
+				macAddress = getMacAddress()
+				#print(macAddress)
+
+				newUsername = simpledialog.askstring('Enter Username', 'Hello! Please enter a new username for your TicTacToe account!', parent=root)
+				#print(newUsername)
+
+				currentUsername = getUsername(macAddress)
+
+				print(newUsername)
+				if newUsername != None:
+					updateUsername(macAddress, newUsername)
+
+
+			def getUsername(mac):
+				users = database.child("users").get()
+				#print(type(username))
+				userExists = False
+
+				for user in users.each():
+					#print('mac:', user.key(), "username:", user.val())
+					if mac == user.key():
+						print('User confirmed:', mac, 'username:', user.val())
+						userExists = True
+						return user.val()
+				if userExists != True:
+					return False
+
+			def updateUsername(mac, username):
+				#data = {mac: username}
+				database.child("users").child(mac).set(username)
+				setupMenu()
+				return f"updated {mac} to {username}"
+
+
 			def setupMenu():
 				screen.fill(LIGHTBLUE)
 				text_surface, rect = TITLE_FONT.render("Welcome to Tic Tac Toe!", (0, 0, 0))
 				screen.blit(text_surface, (100, 40))
+
+				username = getUsername(getMacAddress())
+				if username != False:
+					setName = username
+				else:
+					setName = ''
+				text_surface2, rect = TITLE_FONT_SMALL.render(setName, (0, 0, 0))
+				screen.blit(text_surface2, (100, 100))
 
 				# Multiplayer rect/text
 				pygame.draw.rect(screen, ORANGE, pygame.Rect(200, 200, 200, 50),  2, 14)
@@ -139,6 +196,10 @@ def doMainMenu():
 				# Computer hard
 				pygame.draw.rect(screen, ORANGE, pygame.Rect(200, 400, 200, 50),  2, 14)
 				GAME_FONT.render_to(screen, (256, 415), "AI Hard", (0, 0, 0))
+
+				# button to change username
+				pygame.draw.rect(screen, DARK_ORANGE, pygame.Rect(30, 530, 160, 40),  2, 14)
+				GAME_FONT_SMALL.render_to(screen, (38, 540), "Change Username", (255, 255, 255))
 
 				pygame.display.update()
 				root.update()
@@ -159,9 +220,10 @@ def doMainMenu():
 				if x == 'complete':
 					return
 			elif event.type == pygame.KEYDOWN:
-				print('e')
-				x = simpledialog.askstring('Hello there', 'test', parent=root)
-				print(x)
+				pass
+
+				
+				#print(x, getMacAddress())
 
 
 
@@ -180,9 +242,11 @@ def doMainMenu():
 				print('clicked ai hard')
 				mainMenuClick = 'hard'
 				return 'complete'
+			elif x >= 30 and x <= 190 and y >= 530 and y <= 570:
+				print("change username")
+				changeUsername()		
 
-
-		#pygame.display.update()
+		
 
 doMainMenu()
 
