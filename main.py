@@ -10,10 +10,22 @@ from time import sleep
 import pygame_textinput
 import tkinter
 from tkinter import simpledialog
-#from tkinter import messagebox
 from tkinter import *
 
-pygame.init()
+root = tkinter.Tk()
+embed = tkinter.Frame(root, width=600, height=600)
+embed.grid(columnspan=(600), rowspan=(500))
+embed.pack(side=LEFT)
+os.environ["SDL_WINDOWID"] = str(embed.winfo_id())
+# check if OS is windows, if so, run:
+#os.environ["SDL_VIDEODRIVER"] = 'windib' 
+
+root.update()
+root.withdraw()
+# set screen size
+
+pygame.display.init()
+pygame.freetype.init()
 clock = pygame.time.Clock()
 
 BLACK = (0, 0, 0)
@@ -97,22 +109,18 @@ class menuManager (threading.Thread):
 
 # class textManager (threading.Thread):
 # 	def run(self):
-# 		#import tkinter
-# 		#from tkinter import simpledialog
-# 		root = tkinter.Tk()
-# 		print('ex')
+# 		while True:
+# 			pyautogui.prompt('What is your name?')
+		
 
 
 #textManager = textManager()
 #textManager.start()
 
-#root = tkinter.Tk()
 
 def doMainMenu():
 	global mainMenuDrawn
 	global mainMenuClick
-	#global textInput
-	# nameTextInput = pygame_textinput.TextInputVisualizer()
 	while True:
 		if mainMenuDrawn != True:
 			def setupMenu():
@@ -132,20 +140,13 @@ def doMainMenu():
 				pygame.draw.rect(screen, ORANGE, pygame.Rect(200, 400, 200, 50),  2, 14)
 				GAME_FONT.render_to(screen, (256, 415), "AI Hard", (0, 0, 0))
 
-				#root = tkinter.Tk()
-				#sleep(0.5)
-				# withdraw() will make the parent window disappear.
-				#root.withdraw()
-				
-
 				pygame.display.update()
+				root.update()
+
 			setupMenu()
 			mainMenuDrawn = True
 
 		events = pygame.event.get()
-		
-		#nameTextInput.update(events)
-		#screen.blit(nameTextInput.surface, (10, 10))
 
 
 		for event in events:
@@ -159,14 +160,10 @@ def doMainMenu():
 					return
 			elif event.type == pygame.KEYDOWN:
 				print('e')
-
-		# shows a dialogue with a string input field
-		#youtube_url = simpledialog.askstring('YouTube URL', 'Enter the youtube URL of the video', parent=root)
-		#print(youtube_url)
+				x = simpledialog.askstring('Hello there', 'test', parent=root)
+				print(x)
 
 
-		#inputTextSurface = baseFont.render(textInput, True, (255, 255, 255))
-		#screen.blit(inputTextSurface, (0, 0))
 
 		def mouseClick(pos):
 			global mainMenuClick
@@ -187,10 +184,7 @@ def doMainMenu():
 
 		#pygame.display.update()
 
-
 doMainMenu()
-
-#root = tkinter.Tk()
 
 
 ##### PLAYER VS PLAYER 
@@ -229,6 +223,7 @@ def doGame():
 
 
 		pygame.display.update()
+		root.update()
 
 		def mouseClick(pos):
 			x, y = pos[0], pos[1]
@@ -363,6 +358,7 @@ def doRandom():
 
 
 		pygame.display.update()
+		root.update()
 
 		def mouseClick(pos):
 			x, y = pos[0], pos[1]
@@ -521,6 +517,7 @@ def doHard():
 
 
 		pygame.display.update()
+		root.update()
 
 		def mouseClick(pos):
 			x, y = pos[0], pos[1]
