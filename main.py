@@ -1,6 +1,7 @@
 #!/usr/bin/env python3.9
 
 ##### Jamie Cole 2021 SDD Minor Project TicTacToe  #####
+##### Required libraries: pygame, pygame_textinput, tkinter, pyrebase4
 
 # Importing libraries required for use
 import sys
