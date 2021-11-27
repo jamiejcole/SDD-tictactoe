@@ -1,4 +1,8 @@
 #!/usr/bin/env python3.9
+
+##### Jamie Cole 2021 SDD Minor Project TicTacToe  #####
+
+# Importing libraries required for use
 import sys
 import os
 import time
@@ -14,6 +18,7 @@ from tkinter import *
 from macAddress import getMacAddress
 import pyrebase
 
+# Setting Tkinter Root variables so as to embed pygame inside tkinter
 root = tkinter.Tk()
 embed = tkinter.Frame(root, width=600, height=600)
 embed.grid(columnspan=(600), rowspan=(500))
@@ -22,12 +27,13 @@ os.environ["SDL_WINDOWID"] = str(embed.winfo_id())
 
 root.update()
 root.withdraw()
-# set screen size
 
+# Setting Pygame variables
 pygame.display.init()
 pygame.freetype.init()
 clock = pygame.time.Clock()
 
+# Setting Colours
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
@@ -41,6 +47,7 @@ DARK_ORANGE = (240, 147, 43)
 PLAYER1_COL = (34, 166, 179)
 PLAYER2_COL = (104, 109, 224)
 
+# Setting Fonts and screen size for the game
 size = (600, 600)
 screen = pygame.display.set_mode(size)
 GAME_FONT = pygame.freetype.Font("OpenSans-Regular.ttf", 24)
@@ -55,6 +62,8 @@ WIN_MSG_FONT = pygame.freetype.Font("OpenSans-Regular.ttf", 34)
 
 currentPlayer = 1
 
+
+# Setting global variables to be used within different game instances
 global gameHasStarted
 gameHasStarted = False
 global mainMenuDrawn
@@ -87,6 +96,7 @@ global gameOver
 gameOver = False
 
 
+# Firebase config data
 config = {
   "apiKey": "AIzaSyDTcEP5kkVDE1n7n1MjwBuceo3hO3BNV9o",
   "authDomain": "sdd-tictactoe.firebaseapp.com",
@@ -98,7 +108,7 @@ firebase = pyrebase.initialize_app(config)
 database = firebase.database()
 
 
-# setting the min and max positions for each tile
+# Setting the min and max positions for each tile
 tiles = {
 	"t1": ((0, 0), (200, 200)),
 	"t2": ((210, 0), (400, 200)),
@@ -111,6 +121,7 @@ tiles = {
 	"t9": ((410, 410), (600, 600)),
 }
 
+# Stores the current game board
 moves = [
 	'/', '/', '/',
 	'/', '/', '/',
@@ -118,6 +129,7 @@ moves = [
 ]
 
 
+# A multithreaded function to detect whether the game is over, and quit
 class gameOverChecker (threading.Thread):
 	def run(self):
 		global gameOver
@@ -126,30 +138,32 @@ class gameOverChecker (threading.Thread):
 				print('\nGame is over! Quitting Tic Tac Toe!')
 				sleep(5)
 				os._exit(1)
+				sys.exit()
 		
 gameOverChecker = gameOverChecker()
 gameOverChecker.start()
 
 
-
+# Runs the main menu 
 def doMainMenu():
 	global mainMenuDrawn
 	global mainMenuClick
+	global gameOver
 	while True:
 		if mainMenuDrawn != True:
+
+			# Changes the user's username
 			def changeUsername():
 				macAddress = getMacAddress()
-				#print(macAddress)
 
 				newUsername = simpledialog.askstring('Enter Username', 'Hello! Please enter a new username for your TicTacToe account!', parent=root)
-				#print(newUsername)
-
 				currentUsername = getUsername(macAddress)
 
 				print(newUsername)
 				if newUsername != None:
 					updateUsername(macAddress, newUsername)
 
+			# Changes the second players username for multiplayer mode
 			def changeUsernamePlayer2():
 				global playerTwoUsername
 				newUsername = simpledialog.askstring('Enter Username Player 2', 'Hello! Please enter a username for player 2s tictactoe account!', parent=root)
@@ -157,6 +171,7 @@ def doMainMenu():
 				print("player 2's username:", playerTwoUsername)
 				setupMenu()
 
+			# Gets the username assigned to the MAC address of this device in the Firebase Database
 			def getUsername(mac):
 				users = database.child("users").get()
 				#print(type(username))
@@ -171,6 +186,7 @@ def doMainMenu():
 				if userExists != True:
 					return False
 
+			# Gets the users score from the Firebase Database
 			def getScore(username):
 				scores = database.child("scores").get()
 				yourScore = []
@@ -194,10 +210,14 @@ def doMainMenu():
 				return yourScore
 
 
-
+			# Updates the username in the Firebase Database to a new one
 			def updateUsername(mac, username):
 				oldUsername = getUsername(mac)
-				oldScore = getScore(oldUsername)[2]
+				try:
+					oldScore = getScore(oldUsername)[2]
+				except:
+					oldScore = 0
+
 				#print(f"oldUsername: {oldUsername}. oldScore: {oldScore}")
 
 				# upadting users table
@@ -212,8 +232,7 @@ def doMainMenu():
 				return f"updated {mac} to {username}"
 
 
-
-
+			# Finds top three players for main menu 
 			def findTopThree():
 				scores = database.child("scores").get()
 				userScores = {}
@@ -230,8 +249,7 @@ def doMainMenu():
 				return topThree
 
 
-
-
+			# Draws all relevant content onto screen
 			def setupMenu():
 				global playerOneUsername
 				global playerTwoUsername
@@ -285,7 +303,7 @@ def doMainMenu():
 				playerOne = [list(topThreePlayers.keys())[0], topThreePlayers[list(topThreePlayers.keys())[0]]]
 				playerTwo = [list(topThreePlayers.keys())[1], topThreePlayers[list(topThreePlayers.keys())[1]]]
 				playerThree = [list(topThreePlayers.keys())[2], topThreePlayers[list(topThreePlayers.keys())[2]]]
-				print(playerOne, playerTwo, playerThree)
+				# print(playerOne, playerTwo, playerThree)
 
 				# setting top three players on screen
 				LEADERBOARD_FONT_TEXT.render_to(screen, (450, 200), '1 '+ str(playerOne[0]), (255, 255, 255))
@@ -318,6 +336,7 @@ def doMainMenu():
 		for event in events:
 			if event.type == pygame.QUIT:
 				pygame.quit()
+				gameOver = True
 				sys.exit()
 			elif event.type == pygame.MOUSEBUTTONUP:
 				pos = pygame.mouse.get_pos()
@@ -327,12 +346,8 @@ def doMainMenu():
 			elif event.type == pygame.KEYDOWN:
 				pass
 
-				
-				#print(x, getMacAddress())
-
-		
-
-
+			
+		# Checks which button is clicked
 		def mouseClick(pos):
 			global mainMenuClick
 			x, y = pos[0], pos[1]
@@ -356,7 +371,6 @@ def doMainMenu():
 				changeUsernamePlayer2()
 
 		
-
 doMainMenu()
 
 
@@ -383,27 +397,33 @@ def doGame():
 			setupBoard()
 			gameHasStarted = True
 
+		# Collects all inputs 
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
+				# Exit the game if it is closed
 				pygame.quit()
+				gameOver = True
 				sys.exit()
 			elif event.type == pygame.MOUSEBUTTONUP:
 				pos = pygame.mouse.get_pos()
 				mouseClick(pos)
 				x = detectWin()
+				# Checks if there is a winner
 				if x != None:
-					print(x)
+					# print(x)
 					drawWin(x[1], x[2])
 					displayWin(x[0])
+					# Awards points to winner
 					if hasBeenAwardedPoints == False:
 						awardPoints(x[0])
 						hasBeenAwardedPoints = True
 						gameOver = True
 
-
+		# Updates display
 		pygame.display.update()
 		root.update()
 
+		# Checks mouse pos
 		def mouseClick(pos):
 			x, y = pos[0], pos[1]
 			for i in tiles:
@@ -412,6 +432,7 @@ def doGame():
 						drawTile(i)
 						return
 
+		# Draws a tile in the specified tile
 		def drawTile(tile):
 			global currentPlayer
 			if checkTile(tile, currentPlayer):
@@ -437,17 +458,20 @@ def doGame():
 				else:
 					currentPlayer = 1
 
+		# Checks if player is in the specified tile
 		def checkTile(tile, player):
 			global hasWon
 			print('has won:', hasWon)
 			x = tile[1]
 			return True if (moves[int(x) - 1] == '/' and hasWon == False) else False
 
+		# adds a new move to the board array
 		def storeMove(tile, currentPlayer):
 			x = tile[1]
 			moves[int(x) - 1] = str(currentPlayer)
 			#printBoard()
 
+		# prints the board to the terminal, deprecated
 		def printBoard():
 			for i, j in enumerate(moves):
 				print(moves[i], end='')
@@ -455,6 +479,7 @@ def doGame():
 					print('\n')
 			print('\n\n')
 
+		# detects winning combos
 		def detectWin():
 			global hasWon
 			for i in range(0, 8, 3):
@@ -478,6 +503,7 @@ def doGame():
 				hasWon = True, moves[i]
 				return moves[4], 2, 6
 
+		# Displays the winner with a message
 		def displayWin(winner):
 			print("winner:", winner)
 			global playerOneUsername
@@ -493,7 +519,7 @@ def doGame():
 				else:
 					WIN_MSG_FONT.render_to(screen, (250, 250), f"(no name) wins!", (0, 0, 0))
 
-
+		# Draws a line through the winning combo
 		def drawWin(pos1, pos2):
 			print(pos1, pos2)
 			tileStart = tiles['t' + str(pos1 + 1)]  # ((0, 210), (200, 400))
@@ -514,6 +540,7 @@ def doGame():
 			endCentre = (ex1+(ex2-ex1)/2, ey1+(ey2-ey1)/2)
 			pygame.draw.line(screen, BLACK, startCentre, endCentre, 14)
 
+		# Awards points to player with Firebase Database
 		def awardPoints(player):
 			global playerOneUsername
 			global playerTwoUsername
@@ -562,13 +589,14 @@ def doRandom():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
+				gameOver = True
 				sys.exit()
 			elif event.type == pygame.MOUSEBUTTONUP:
 				pos = pygame.mouse.get_pos()
 				mouseClick(pos)
 				x = detectWin()
 				if x != None:
-					print(x)
+					#print(x)
 					drawWin(x[1], x[2])
 					displayWin(x[0])
 					if hasBeenAwardedPoints == False:
@@ -596,29 +624,24 @@ def doRandom():
 				x2 = tiles[tile][1][0]
 				y2 = tiles[tile][1][1]
 
-
+				# Players move:
 				pygame.draw.line(screen, PLAYER2_COL, (x1+20, y1+20), (x2-20, y2-20), 7)
 				pygame.draw.line(screen, PLAYER2_COL, (x1+20, y2-20), (x2-20, y1+20), 7)
-				#else:
-				#	xx = x2 - x1
-				#	yy = y2 - y1
-				#	mid = (xx, yy)
-					
-
-				#pygame.display.flip()
+				
 				storeMove(tile, currentPlayer)
 
 				
 				x = detectWin()
 				if x != None:
-					print(x)
+					#print(x)
 					drawWin(x[1], x[2])
 					
+				# Computers move:
 				satisfied = False
 				attemptNo = 0
 				while satisfied != True:
 					randNum = random.randint(0, 8)
-					print('rand num: ', randNum)
+					#print('rand num: ', randNum)
 					if moves[randNum] == '/':
 						satisfied = True
 						x1 = tiles['t' + str(randNum + 1)][0][0]
@@ -630,12 +653,10 @@ def doRandom():
 					else:
 						attemptNo += 1
 						if attemptNo >= 10:
+							displayWin('3')
+							gameOver = True
 							return
 
-				#if currentPlayer == 1:
-				#	currentPlayer = 2
-				#else:
-				#	currentPlayer = 1
 
 		def checkTile(tile, player):
 			global hasWon
@@ -682,6 +703,7 @@ def doRandom():
 			print("winner:", winner)
 			global playerOneUsername
 			global playerTwoUsername
+			global gameOver
 			player1 = playerOneUsername
 			player2 = playerTwoUsername
 
@@ -689,6 +711,9 @@ def doRandom():
 				WIN_MSG_FONT.render_to(screen, (250, 250), f"{player1} wins!", (0, 0, 0))
 			elif winner == '2':
 				WIN_MSG_FONT.render_to(screen, (250, 250), f"Bot wins!", (0, 0, 0))
+			elif winner == '3':
+				WIN_MSG_FONT.render_to(screen, (250, 250), "Tie!", (0, 0, 0))
+				gameOver = True
 
 
 		def drawWin(pos1, pos2):
@@ -717,6 +742,7 @@ def doRandom():
 			winner = ''
 			points = 0
 
+			# Awards 10 points to player if they win, and removes 10 points if they lose
 			if player == '1':
 				winner = playerOneUsername
 				points = 10
@@ -755,13 +781,14 @@ def doHard():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
+				gameOver = True
 				sys.exit()
 			elif event.type == pygame.MOUSEBUTTONUP:
 				pos = pygame.mouse.get_pos()
 				mouseClick(pos)
 				x = detectWin()
 				if x != None:
-					print(x)
+					#print(x)
 					drawWin(x[1], x[2])
 					displayWin(x[0])
 					if hasBeenAwardedPoints == False:
@@ -785,6 +812,7 @@ def doHard():
 			global currentPlayer
 			global aiMoveNo
 			global playerMoveDict
+			global gameOver
 			if checkTile(tile, currentPlayer):
 				x1 = tiles[tile][0][0]
 				y1 = tiles[tile][0][1]
@@ -798,17 +826,18 @@ def doHard():
 
 				#Adding the player's move to the playerMove dictionary
 				playerMoveDict[len(playerMoveDict) + 1] = int(tile[1]) - 1
-				print(playerMoveDict)
+				#print(playerMoveDict)
 				
+				# Detects win and then draws winning combo
 				x = detectWin()
 				if x != None:
 					#print(x)
 					drawWin(x[1], x[2])
 					return
 					
-
+				# Draws player twos circle
 				def drawCircle(circleTile):
-					print('circletile: ' , circleTile)
+					#print('circletile: ' , circleTile)
 					x1 = tiles['t' + str(circleTile + 1)][0][0]
 					y1 = tiles['t' + str(circleTile + 1)][0][1]
 					x2 = tiles['t' + str(circleTile + 1)][1][0]
@@ -816,8 +845,9 @@ def doHard():
 					pygame.draw.circle(screen, PLAYER2_COL, (x1+(x2-x1)/2, y1+(y2-y1)/2), 70, 7)
 					storeMove('t' + str(circleTile + 1), 2)
 
+				# Finds adjacent tiles next to a tile 
 				def findAdjacent(tile):
-					print("finding adjacent tile in tile", tile)
+					#print("finding adjacent tile in tile", tile)
 					adjacentTiles = {
 						0: (1, 3),
 						2: (1, 5),
@@ -837,33 +867,31 @@ def doHard():
 								return i
 						return 'no'
 
+				# Checks if there are two tiles in a row 
 				def detectTwoInARow():
 					for i in range(0, 8, 3):
 						if moves[i] == moves[i + 1] and moves[i + 2] == '/' and moves[i] != '/' or moves[i] == moves[i + 2] and moves[i + 1] == '/' and moves[i] != '/' or moves[i + 1] == moves[i + 2] and moves[i] == '/' and moves[i + 1] != '/':
 							#print(i, "horizon")
 							if moves[i] == moves[i + 1] and moves[i + 2] == '/' and moves[i] != '/':
-								print('yeeman 1')
 								return i + 2, moves[i]
 							elif moves[i + 1] == moves[i + 2] and moves[i] == '/' and moves[i + 1] != '/':
-								print('yeeman 2')
 								return i, moves[i + 1]
 							elif moves[i] == moves[i + 2] and moves[i + 1] == '/' and moves[i] != '/':
-								print('yeeman 3')
 								return i + 1, moves[i]
 
 					for i in range(0, 3):
-						print('MOVESI: ', moves[i], 'I:', i)
+						#print('MOVESI: ', moves[i], 'I:', i)
 						if moves[i] == moves[i + 3] and moves[i + 6] == '/' and moves[i] != '/' or moves[i] == moves[i + 6] and moves[i + 3] == '/' and moves[i] != '/' or moves[i + 3] == moves[i + 6] and moves[i] == '/' and moves[i + 3] != '/':
 							#print(i, "colm")
-							print('MOVESI2: ', moves[i], 'I:', i)
+							#print('MOVESI2: ', moves[i], 'I:', i)
 							if moves[i] == moves[i + 3] and moves[i + 6] == '/' and moves[i] != '/':
 								return i + 6, moves[i]
-								print('cs1 ')
+								#print('cs1 ')
 							elif moves[i + 3] == moves[i + 6] and moves[i] == '/' and moves[i + 3] != '/':
 								return i, moves[i + 3]
-								print('cs2 ')
+								#print('cs2 ')
 							elif moves[i] == moves[i + 6] and moves[i + 3] == '/' and moves[i] != '/':
-								print('cs3 ')
+								#print('cs3 ')
 								return i + 3, moves[i]
 						
 
@@ -881,9 +909,11 @@ def doHard():
 							return 2, moves[4]
 					return 'no'
 
+				# 'AI' Logic for the cant lose algoritm
 				satisfied = False
 				attemptNo = 0
 				while satisfied != True:
+					# Checks if its the bots first move
 					if aiMoveNo == 1:
 						if moves[4] == '1':
 							#print('player 1 went in centre tile')
@@ -896,9 +926,10 @@ def doHard():
 							drawCircle(4)
 							aiMoveNo += 1
 							break
+					# Checks if its the bots second move
 					elif aiMoveNo == 2:
 						x = detectTwoInARow()
-						print(x)
+						#print(x)
 						if x != 'no':
 							#print('FOUND RTHE TWO IN A ROW: ', x)
 							#print('x=', x)
@@ -926,20 +957,15 @@ def doHard():
 							# 		checked = True
 							# 		drawCircle(choice)
 						aiMoveNo += 1
-						print('got here')
 						break
+					# Checks if its over 2 moves
 					elif aiMoveNo > 2:
-						print('got here 2')
 						x = detectTwoInARow()
-						print('newx6969:', x)
 						if x != 'no' and x[1] == '1':
-							print('IFSTATEMENT 1')
 							drawCircle(x[0])
 						elif x != 'no' and x[1] == '2':
-							print('IFSTATEMENT 2')
 							drawCircle(x[0])
 						else:
-							print('IFSTATEMENT 3')
 							checked = False
 							checkedNos = []
 							while checked != True and len(checkedNos) < 9:
@@ -953,15 +979,10 @@ def doHard():
 									if choice not in checkedNos:
 										checkedNos.append(choice)
 							print('DRAW!')
+							gameOver = True
+							displayWin('3')
 						aiMoveNo += 1
 						break 
-						# so, so, many bugs.
-						# 1. will randomly decide its a draw
-						# 2. when there is an obvious move for computer to make
-						#    to win, it doesn't go, a line with a gap in 
-						#    the middle.
-						# 3. program crashes when there are 2 xs in a row and 
-						#    then user goes in the 3rd spot in the row...
 
 
 
@@ -1019,6 +1040,8 @@ def doHard():
 				WIN_MSG_FONT.render_to(screen, (250, 250), f"{player1} wins!!", (0, 0, 0))
 			elif winner == '2':
 				WIN_MSG_FONT.render_to(screen, (250, 250), f"AI wins!", (0, 0, 0))
+			elif winner == '3':
+				WIN_MSG_FONT.render_to(screen, (250, 250), "Tie!", (0, 0, 0))
 
 		def drawWin(pos1, pos2):
 			print(pos1, pos2)
@@ -1056,6 +1079,7 @@ def doHard():
 			curScore = database.child("scores").child(winner).get().val()
 			database.child("scores").child(winner).set(curScore + points)
 
+# Checks which mode was selected in the main menu
 if mainMenuClick == 'multiplayer':
 	doGame()
 elif mainMenuClick == 'random':
