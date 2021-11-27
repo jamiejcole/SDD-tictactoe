@@ -48,6 +48,11 @@ GAME_FONT_SMALL = pygame.freetype.Font("OpenSans-Regular.ttf", 16)
 TITLE_FONT = pygame.freetype.Font("OpenSans-Regular.ttf", 34)
 TITLE_FONT_SMALL = pygame.freetype.Font("OpenSans-Regular.ttf", 22)
 
+LEADERBOARD_FONT_TITLE = pygame.freetype.Font("OpenSans-Regular.ttf", 16)
+LEADERBOARD_FONT_TEXT = pygame.freetype.Font("OpenSans-Regular.ttf", 11)
+
+WIN_MSG_FONT = pygame.freetype.Font("OpenSans-Regular.ttf", 34)
+
 currentPlayer = 1
 
 global gameHasStarted
@@ -71,6 +76,15 @@ playerMoveDict = {}
 
 global textInput
 textInput = ''
+
+global playerOneUsername
+playerOneUsername = ''
+
+global playerTwoUsername
+playerTwoUsername = ''
+
+global gameOver
+gameOver = False
 
 
 config = {
@@ -103,32 +117,18 @@ moves = [
 	'/', '/', '/'
 ]
 
-class menuManager (threading.Thread):
+
+class gameOverChecker (threading.Thread):
 	def run(self):
-		global mainMenuClick
+		global gameOver
 		while True:
-			if mainMenuClick == 'multiplayer':
-				doGame()
-				print('did multiplarey')
-			else:
-				print('xe')
-				sleep(0.5)
-		#print('hello')
-
-
-#menuManager = menuManager()
-#menuManager.start()
-
-
-# class textManager (threading.Thread):
-# 	def run(self):
-# 		while True:
-# 			pyautogui.prompt('What is your name?')
+			if gameOver == True:
+				print('\nGame is over! Quitting Tic Tac Toe!')
+				sleep(5)
+				os._exit(1)
 		
-
-
-#textManager = textManager()
-#textManager.start()
+gameOverChecker = gameOverChecker()
+gameOverChecker.start()
 
 
 
@@ -150,6 +150,12 @@ def doMainMenu():
 				if newUsername != None:
 					updateUsername(macAddress, newUsername)
 
+			def changeUsernamePlayer2():
+				global playerTwoUsername
+				newUsername = simpledialog.askstring('Enter Username Player 2', 'Hello! Please enter a username for player 2s tictactoe account!', parent=root)
+				playerTwoUsername = newUsername
+				print("player 2's username:", playerTwoUsername)
+				setupMenu()
 
 			def getUsername(mac):
 				users = database.child("users").get()
@@ -159,31 +165,95 @@ def doMainMenu():
 				for user in users.each():
 					#print('mac:', user.key(), "username:", user.val())
 					if mac == user.key():
-						print('User confirmed:', mac, 'username:', user.val())
+						#print('User confirmed:', mac, 'username:', user.val())
 						userExists = True
 						return user.val()
 				if userExists != True:
 					return False
 
+			def getScore(username):
+				scores = database.child("scores").get()
+				yourScore = []
+
+				# finding score from name
+				for user in scores:
+					if user.key() == username:
+						yourScore = [user.key(), user.val()]
+
+				# finding position on leaderboard
+				userScores = {}
+				for user in scores:
+					userScores[user.key()] = user.val()	
+				sort = sorted(userScores, key=userScores.get, reverse=True)
+
+				for i in sort:
+					if i == username:
+						position = sort.index(i) + 1
+						yourScore.append(position)
+
+				return yourScore
+
+
+
 			def updateUsername(mac, username):
-				#data = {mac: username}
+				oldUsername = getUsername(mac)
+				oldScore = getScore(oldUsername)[2]
+				#print(f"oldUsername: {oldUsername}. oldScore: {oldScore}")
+
+				# upadting users table
 				database.child("users").child(mac).set(username)
+				
+				# updating scroes table
+				database.child("scores").child(oldUsername).remove()
+				database.child("scores").child(username).set(oldScore)
+
+				# resetup menu
 				setupMenu()
 				return f"updated {mac} to {username}"
 
 
+
+
+			def findTopThree():
+				scores = database.child("scores").get()
+				userScores = {}
+				topThree = {}
+				for user in scores:
+					userScores[user.key()] = user.val()
+				
+				sort = sorted(userScores, key=userScores.get, reverse=True)
+				topThreePlayers = sort[:3]
+				for i in topThreePlayers:
+					for user in scores:
+						if user.key() == i:
+							topThree[i] = user.val()
+				return topThree
+
+
+
+
 			def setupMenu():
+				global playerOneUsername
+				global playerTwoUsername
+
 				screen.fill(LIGHTBLUE)
+				# Creates welcome message
 				text_surface, rect = TITLE_FONT.render("Welcome to Tic Tac Toe!", (0, 0, 0))
 				screen.blit(text_surface, (100, 40))
 
+				# Finds username, and sets it to the screen
 				username = getUsername(getMacAddress())
+				playerOneUsername = username
 				if username != False:
 					setName = username
 				else:
 					setName = ''
-				text_surface2, rect = TITLE_FONT_SMALL.render(setName, (0, 0, 0))
+				text_surface2, rect = TITLE_FONT_SMALL.render('P1: ' + setName, (0, 0, 0))
 				screen.blit(text_surface2, (100, 100))
+
+				# sets player 2 username to screen
+				text_surface2, rect = TITLE_FONT_SMALL.render('P2: ' + playerTwoUsername, (0, 0, 0))
+				screen.blit(text_surface2, (100, 130))
 
 				# Multiplayer rect/text
 				pygame.draw.rect(screen, ORANGE, pygame.Rect(200, 200, 200, 50),  2, 14)
@@ -200,6 +270,41 @@ def doMainMenu():
 				# button to change username
 				pygame.draw.rect(screen, DARK_ORANGE, pygame.Rect(30, 530, 160, 40),  2, 14)
 				GAME_FONT_SMALL.render_to(screen, (38, 540), "Change Username", (255, 255, 255))
+
+				# button to change 2nd players username
+				pygame.draw.rect(screen, DARK_ORANGE, pygame.Rect(420, 530, 160, 40),  2, 14)
+				GAME_FONT_SMALL.render_to(screen, (428, 540), "Change Player 2", (255, 255, 255))
+
+				### Leaderboard ###
+				# Leaderboard title
+				LEADERBOARD_FONT_TITLE.render_to(screen, (450, 150), "Leaderboard", (255, 255, 255))
+				pygame.draw.line(screen, (255, 255, 255), (450, 165), (550, 165))
+
+				# getting top three players
+				topThreePlayers = findTopThree()
+				playerOne = [list(topThreePlayers.keys())[0], topThreePlayers[list(topThreePlayers.keys())[0]]]
+				playerTwo = [list(topThreePlayers.keys())[1], topThreePlayers[list(topThreePlayers.keys())[1]]]
+				playerThree = [list(topThreePlayers.keys())[2], topThreePlayers[list(topThreePlayers.keys())[2]]]
+				print(playerOne, playerTwo, playerThree)
+
+				# setting top three players on screen
+				LEADERBOARD_FONT_TEXT.render_to(screen, (450, 200), '1 '+ str(playerOne[0]), (255, 255, 255))
+				LEADERBOARD_FONT_TEXT.render_to(screen, (470, 220), str(playerOne[1]) + " points", (255, 255, 255))
+
+				LEADERBOARD_FONT_TEXT.render_to(screen, (450, 270), '2 '+ str(playerTwo[0]), (255, 255, 255))
+				LEADERBOARD_FONT_TEXT.render_to(screen, (470, 290), str(playerTwo[1]) + " points", (255, 255, 255))
+
+				LEADERBOARD_FONT_TEXT.render_to(screen, (450, 340), '3 '+ str(playerThree[0]), (255, 255, 255))
+				LEADERBOARD_FONT_TEXT.render_to(screen, (470, 360), str(playerThree[1]) + " points", (255, 255, 255))
+
+				# setting your score on screen
+				try:
+					yourScore = getScore(getUsername(getMacAddress()))
+					LEADERBOARD_FONT_TEXT.render_to(screen, (450, 430), str(yourScore[2]) + " " + str(yourScore[0]), (255, 255, 255))
+					LEADERBOARD_FONT_TEXT.render_to(screen, (470, 450), str(yourScore[1]) + " points", (255, 255, 255))
+
+				except:
+					LEADERBOARD_FONT_TEXT.render_to(screen, (450, 430), 'No data found', (255, 255, 255))
 
 				pygame.display.update()
 				root.update()
@@ -225,6 +330,7 @@ def doMainMenu():
 				
 				#print(x, getMacAddress())
 
+		
 
 
 		def mouseClick(pos):
@@ -245,6 +351,9 @@ def doMainMenu():
 			elif x >= 30 and x <= 190 and y >= 530 and y <= 570:
 				print("change username")
 				changeUsername()		
+			elif x >= 420 and x <= 580 and y >= 530 and y <= 570:
+				print("change username for player 2")
+				changeUsernamePlayer2()
 
 		
 
@@ -254,6 +363,8 @@ doMainMenu()
 ##### PLAYER VS PLAYER 
 def doGame():
 	global gameHasStarted
+	global gameOver
+	hasBeenAwardedPoints = False
 	while True:
 		if gameHasStarted != True:
 			def setupBoard():
@@ -272,7 +383,6 @@ def doGame():
 			setupBoard()
 			gameHasStarted = True
 
-
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
@@ -284,6 +394,11 @@ def doGame():
 				if x != None:
 					print(x)
 					drawWin(x[1], x[2])
+					displayWin(x[0])
+					if hasBeenAwardedPoints == False:
+						awardPoints(x[0])
+						hasBeenAwardedPoints = True
+						gameOver = True
 
 
 		pygame.display.update()
@@ -363,6 +478,20 @@ def doGame():
 				hasWon = True, moves[i]
 				return moves[4], 2, 6
 
+		def displayWin(winner):
+			print("winner:", winner)
+			global playerOneUsername
+			global playerTwoUsername
+			player1 = playerOneUsername
+			player2 = playerTwoUsername
+
+			if winner == '1':
+				WIN_MSG_FONT.render_to(screen, (250, 250), f"{player1} wins!", (0, 0, 0))
+			elif winner == '2':
+				if player2 != '':
+					WIN_MSG_FONT.render_to(screen, (250, 250), f"{player2} wins!", (0, 0, 0))
+				else:
+					WIN_MSG_FONT.render_to(screen, (250, 250), f"(no name) wins!", (0, 0, 0))
 
 
 		def drawWin(pos1, pos2):
@@ -385,10 +514,32 @@ def doGame():
 			endCentre = (ex1+(ex2-ex1)/2, ey1+(ey2-ey1)/2)
 			pygame.draw.line(screen, BLACK, startCentre, endCentre, 14)
 
+		def awardPoints(player):
+			global playerOneUsername
+			global playerTwoUsername
+			player1 = playerOneUsername
+			player2 = playerTwoUsername
+			winner = ''
+
+			if player == '1':
+				winner = playerOneUsername
+			elif player == '2':
+				if playerTwoUsername != '':
+					winner = playerTwoUsername
+				else:
+					winner = "EmptyPlayer2"
+
+			try:
+				curScore = database.child("scores").child(winner).get().val()
+				database.child("scores").child(winner).set(curScore + 10)
+			except:
+				pass
 
 ##### RANDOM COMPUTER MOVES #####
 def doRandom():
 	global gameHasStarted
+	global gameOver
+	hasBeenAwardedPoints = False
 	while True:
 		if gameHasStarted != True:
 			def setupBoard():
@@ -419,6 +570,11 @@ def doRandom():
 				if x != None:
 					print(x)
 					drawWin(x[1], x[2])
+					displayWin(x[0])
+					if hasBeenAwardedPoints == False:
+						awardPoints(x[0])
+						hasBeenAwardedPoints = True
+						gameOver = True
 
 
 		pygame.display.update()
@@ -522,6 +678,17 @@ def doRandom():
 				hasWon = True, moves[i]
 				return moves[4], 2, 6
 
+		def displayWin(winner):
+			print("winner:", winner)
+			global playerOneUsername
+			global playerTwoUsername
+			player1 = playerOneUsername
+			player2 = playerTwoUsername
+
+			if winner == '1':
+				WIN_MSG_FONT.render_to(screen, (250, 250), f"{player1} wins!", (0, 0, 0))
+			elif winner == '2':
+				WIN_MSG_FONT.render_to(screen, (250, 250), f"Bot wins!", (0, 0, 0))
 
 
 		def drawWin(pos1, pos2):
@@ -544,10 +711,28 @@ def doRandom():
 			endCentre = (ex1+(ex2-ex1)/2, ey1+(ey2-ey1)/2)
 			pygame.draw.line(screen, BLACK, startCentre, endCentre, 14)
 
+		def awardPoints(player):
+			global playerOneUsername
+			player1 = playerOneUsername
+			winner = ''
+			points = 0
+
+			if player == '1':
+				winner = playerOneUsername
+				points = 10
+			elif player == '2':
+				winner = playerOneUsername
+				points = -10
+
+			curScore = database.child("scores").child(winner).get().val()
+			database.child("scores").child(winner).set(curScore + points)
+
 
 ##### MINIMAX COMPUTER MOVES #####
 def doHard():
 	global gameHasStarted
+	global gameOver
+	hasBeenAwardedPoints = False
 	while True:
 		if gameHasStarted != True:
 			def setupBoard():
@@ -578,6 +763,11 @@ def doHard():
 				if x != None:
 					print(x)
 					drawWin(x[1], x[2])
+					displayWin(x[0])
+					if hasBeenAwardedPoints == False:
+						awardPoints(x[0])
+						hasBeenAwardedPoints = True
+						gameOver = True
 
 
 		pygame.display.update()
@@ -818,6 +1008,17 @@ def doHard():
 				return moves[4], 2, 6
 
 
+		def displayWin(winner):
+			print("winner:", winner)
+			global playerOneUsername
+			global playerTwoUsername
+			player1 = playerOneUsername
+			player2 = playerTwoUsername
+
+			if winner == '1':
+				WIN_MSG_FONT.render_to(screen, (250, 250), f"{player1} wins!!", (0, 0, 0))
+			elif winner == '2':
+				WIN_MSG_FONT.render_to(screen, (250, 250), f"AI wins!", (0, 0, 0))
 
 		def drawWin(pos1, pos2):
 			print(pos1, pos2)
@@ -838,6 +1039,22 @@ def doHard():
 			startCentre = (sx1+(sx2-sx1)/2, sy1+(sy2-sy1)/2)
 			endCentre = (ex1+(ex2-ex1)/2, ey1+(ey2-ey1)/2)
 			pygame.draw.line(screen, BLACK, startCentre, endCentre, 14)
+
+		def awardPoints(player):
+			global playerOneUsername
+			player1 = playerOneUsername
+			winner = ''
+			points = 0
+
+			if player == '1':
+				winner = playerOneUsername
+				points = 200
+			elif player == '2':
+				winner = playerOneUsername
+				points = -5
+
+			curScore = database.child("scores").child(winner).get().val()
+			database.child("scores").child(winner).set(curScore + points)
 
 if mainMenuClick == 'multiplayer':
 	doGame()
