@@ -17,7 +17,7 @@ import tkinter
 from tkinter import simpledialog
 from tkinter import *
 from macAddress import getMacAddress
-import pyrebase
+# import pyrebase
 
 # Setting Tkinter Root variables so as to embed pygame inside tkinter
 root = tkinter.Tk()
@@ -98,15 +98,15 @@ gameOver = False
 
 
 # Firebase config data
-config = {
-  "apiKey": "AIzaSyDTcEP5kkVDE1n7n1MjwBuceo3hO3BNV9o",
-  "authDomain": "sdd-tictactoe.firebaseapp.com",
-  "databaseURL": "https://sdd-tictactoe-default-rtdb.firebaseio.com",
-  "storageBucket": "sdd-tictactoe.appspot.com"
-}
+# config = {
+#   "apiKey": "AIzaSyDTcEP5kkVDE1n7n1MjwBuceo3hO3BNV9o",
+#   "authDomain": "sdd-tictactoe.firebaseapp.com",
+#   "databaseURL": "https://sdd-tictactoe-default-rtdb.firebaseio.com",
+#   "storageBucket": "sdd-tictactoe.appspot.com"
+# }
 
-firebase = pyrebase.initialize_app(config)
-database = firebase.database()
+# firebase = pyrebase.initialize_app(config)
+# database = firebase.database()
 
 
 # Setting the min and max positions for each tile
@@ -174,41 +174,43 @@ def doMainMenu():
 
 			# Gets the username assigned to the MAC address of this device in the Firebase Database
 			def getUsername(mac):
-				users = database.child("users").get()
-				#print(type(username))
-				userExists = False
+				# users = database.child("users").get()
+				# #print(type(username))
+				# userExists = False
 
-				for user in users.each():
-					#print('mac:', user.key(), "username:", user.val())
-					if mac == user.key():
-						#print('User confirmed:', mac, 'username:', user.val())
-						userExists = True
-						return user.val()
-				if userExists != True:
-					return False
+				# for user in users.each():
+				# 	#print('mac:', user.key(), "username:", user.val())
+				# 	if mac == user.key():
+				# 		#print('User confirmed:', mac, 'username:', user.val())
+				# 		userExists = True
+				# 		return user.val()
+				# if userExists != True:
+				# 	return False
+				return "test"
 
 			# Gets the users score from the Firebase Database
 			def getScore(username):
-				scores = database.child("scores").get()
-				yourScore = []
+				# scores = database.child("scores").get()
+				# yourScore = []
 
-				# finding score from name
-				for user in scores:
-					if user.key() == username:
-						yourScore = [user.key(), user.val()]
+				# # finding score from name
+				# for user in scores:
+				# 	if user.key() == username:
+				# 		yourScore = [user.key(), user.val()]
 
-				# finding position on leaderboard
-				userScores = {}
-				for user in scores:
-					userScores[user.key()] = user.val()	
-				sort = sorted(userScores, key=userScores.get, reverse=True)
+				# # finding position on leaderboard
+				# userScores = {}
+				# for user in scores:
+				# 	userScores[user.key()] = user.val()	
+				# sort = sorted(userScores, key=userScores.get, reverse=True)
 
-				for i in sort:
-					if i == username:
-						position = sort.index(i) + 1
-						yourScore.append(position)
+				# for i in sort:
+				# 	if i == username:
+				# 		position = sort.index(i) + 1
+				# 		yourScore.append(position)
 
-				return yourScore
+				# return yourScore
+				return 1
 
 
 			# Updates the username in the Firebase Database to a new one
@@ -222,32 +224,39 @@ def doMainMenu():
 				#print(f"oldUsername: {oldUsername}. oldScore: {oldScore}")
 
 				# upadting users table
-				database.child("users").child(mac).set(username)
+				# database.child("users").child(mac).set(username)
 				
-				# updating scroes table
-				database.child("scores").child(oldUsername).remove()
-				database.child("scores").child(username).set(oldScore)
+				# # updating scroes table
+				# database.child("scores").child(oldUsername).remove()
+				# database.child("scores").child(username).set(oldScore)
 
-				# resetup menu
+				# # resetup menu
 				setupMenu()
 				return f"updated {mac} to {username}"
 
 
 			# Finds top three players for main menu 
 			def findTopThree():
-				scores = database.child("scores").get()
-				userScores = {}
-				topThree = {}
-				for user in scores:
-					userScores[user.key()] = user.val()
-				
-				sort = sorted(userScores, key=userScores.get, reverse=True)
-				topThreePlayers = sort[:3]
-				for i in topThreePlayers:
-					for user in scores:
-						if user.key() == i:
-							topThree[i] = user.val()
+				# 	scores = database.child("scores").get()
+				# 	userScores = {}
+				# 	topThree = {}
+				# 	for user in scores:
+				# 		userScores[user.key()] = user.val()
+					
+				# 	sort = sorted(userScores, key=userScores.get, reverse=True)
+				# 	topThreePlayers = sort[:3]
+				# 	for i in topThreePlayers:
+				# 		for user in scores:
+				# 			if user.key() == i:
+				# 				topThree[i] = user.val()
+				# 	return topThree
+				topThree = {
+					'player1': 100,
+					'player2': 90,
+					'player3': 80
+				}
 				return topThree
+				# return {}
 
 
 			# Draws all relevant content onto screen
@@ -558,8 +567,9 @@ def doGame():
 					winner = "EmptyPlayer2"
 
 			try:
-				curScore = database.child("scores").child(winner).get().val()
-				database.child("scores").child(winner).set(curScore + 10)
+				# curScore = database.child("scores").child(winner).get().val()
+				# database.child("scores").child(winner).set(curScore + 10)
+				print('e')
 			except:
 				pass
 
@@ -751,8 +761,8 @@ def doRandom():
 				winner = playerOneUsername
 				points = -10
 
-			curScore = database.child("scores").child(winner).get().val()
-			database.child("scores").child(winner).set(curScore + points)
+			# curScore = database.child("scores").child(winner).get().val()
+			# database.child("scores").child(winner).set(curScore + points)
 
 
 ##### MINIMAX COMPUTER MOVES #####
@@ -1077,8 +1087,8 @@ def doHard():
 				winner = playerOneUsername
 				points = -5
 
-			curScore = database.child("scores").child(winner).get().val()
-			database.child("scores").child(winner).set(curScore + points)
+			# curScore = database.child("scores").child(winner).get().val()
+			# database.child("scores").child(winner).set(curScore + points)
 
 # Checks which mode was selected in the main menu
 if mainMenuClick == 'multiplayer':
